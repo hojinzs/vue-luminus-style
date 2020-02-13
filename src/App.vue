@@ -1,28 +1,70 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+    <div id="app">
+        <div>
+            <h1>Luminus UI Sample</h1>
+            <hr>
+        </div>
+        <div>
+
+            <h2>Caroucel Sample</h2>
+
+            <lumiCaroucel>
+
+                <lumiCaroucelSlide
+                    v-for="(item, index) in items"
+                    :key="index"
+                    :ref="'item_num_'+index"
+                    v-on:mounted="callback">
+
+                    <button
+                        @click="getOffsetWidth($event)">
+                        {{ item.name }}
+                    </button>
+
+                </lumiCaroucelSlide>
+
+            </lumiCaroucel>
+
+        </div>
+    </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { lumiCaroucel, lumiCaroucelSlide } from './luminus/components'
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
+    name: 'App',
+    components: {
+        lumiCaroucel,
+        lumiCaroucelSlide
+    },
+    data(){
+        let items = function(_num = 2){
+            let arr = new Array
+            for (let index = 0; index < _num; index++) {
+                arr.push({
+                    'index' : index,
+                    'name' : '테스트_'+(index+1)
+                })
+            }
+            return arr
+        }
+        return {
+            items: items(20)
+        }
+    },
+    methods:{
+        getOffsetWidth(event){
+            console.log("OffsetLeft =>", event.target.offsetLeft)
+        },
+        callback(slide){
+            console.log("offsetLeft => ", slide)
+        }
+    }
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="stylus" scoped>
+@import 'luminus/luminus'
+
 </style>
