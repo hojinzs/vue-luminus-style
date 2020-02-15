@@ -8,7 +8,8 @@
 
             <h2>Caroucel Sample</h2>
 
-            <lumiCaroucel>
+            <lumiCaroucel
+                :speedStiky="300">
 
                 <lumiCaroucelSlide
                     v-for="(item, index) in items"
@@ -16,7 +17,7 @@
                     :ref="'item_num_'+index">
 
                     <button
-                        @click.capture="childClick(item)">
+                        @click="childClick(item)">
                         {{ item.name }} {{ item.clicked }}
                     </button>
 

@@ -11,8 +11,8 @@
     "core-js": "^3.6.4",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
-    "vue": "^2.6.11",
-    "vue2-touch-events": "^2.1.0"
+    "velocity-animate": "^2.0.5",
+    "vue": "^2.6.11"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.2.0",

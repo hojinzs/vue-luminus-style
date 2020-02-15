@@ -1,5 +1,5 @@
 <template>
-    <div class="lumi-flex-slider-wrapper"
+    <div class="lumi-flex-slider-wrapper" ref="main"
         @click.stop.prevent
         @mousedown="sliderFocusOn($event)"
         @mousemove="sliderMoveHandler($event)"
@@ -9,19 +9,46 @@
         <ul class="lumi-flex-slider" ref="slider">
             <slot></slot>
         </ul>
-        <div>
-            {{ testText }}
-        </div>
     </div>
 </template>
 
 <script>
+import Velocity from 'velocity-animate'
+
 export default {
     name: 'lumi-carousel',
     props: {
         itemStiky: {
             type: Boolean,
             default: true
+        },
+        speedStiky: {
+            default: 200,
+            validator: function(value){
+                let check
+                switch (value) {
+                    case typeof(value) == Number :
+                        check = true
+                        break;
+
+                    case 'slow' :
+                        check = true
+                        break;
+
+                    case 'nomal' :
+                        check = true
+                        break;
+
+                    case 'fase' :
+                        check = true
+                        break;
+
+                    default:
+                        check = false
+                        break;
+                }
+                return check
+            }
         }
     },
     data(){
@@ -34,7 +61,7 @@ export default {
                 startPosition : 0,
             },
             SliderMoving: false,
-            testText: "",
+            StickySpeed : this.speedStiky
         }
     },
     methods:{
@@ -80,37 +107,18 @@ export default {
         doItemStiky(_item){
             if(!_item) _item = this.getLeftItem()
 
-            let movin           = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft,                // 움직여야 하는 목표 
-                movin_abs       = Math.abs(movin),
-                time            = 120,                                                                      // 세팅 시간
-                movin_delay     = (time > movin_abs)? Math.round( time / movin_abs) : time,                 // 인터벌 대기시간
-                movin_pixcel    = (time < movin_abs)? Math.sign(movin)*(Math.round(movin_abs / time)) : Math.sign(movin)*1, // 회당 움직일 거리
-                movin_count     = Math.round( time / movin_delay ),                                         // 인터벌 횟수
-                movin_time      = movin_delay * movin_count,                                                // 총 대기 시간
-                movin_adjust    = movin - ( movin_pixcel * movin_count )                                // 보정 픽셀
+            let movin           = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
 
-                console.log("time set => ", time,
-                            "\nmovin_total_pixel => ", movin,
-                            "\nmovin_pixel_per_interval => ", movin_pixcel,
-                            "\ninterval delay => ", movin_delay,
-                            "\ninterval count => ", movin_count,
-                            "\nmovin time => ",movin_time,
-                            "\nmovin adust => ", movin_adjust)
-
-            this.SliderMoving = true
-            this.slideAnimation = setInterval(() => {
-                console.log("movin => ", movin_pixcel+"px")
-                this.$el.scrollLeft = this.$el.scrollLeft + movin_pixcel
-            },movin_delay)
-
-            setTimeout(()=>{
-                clearInterval(this.slideAnimation)
-                this.$el.scrollLeft = this.$el.scrollLeft + movin_adjust
-
-                setTimeout(() => {
-                    this.SliderMoving = false
-                },100)
-            },movin_time + 1)
+            /**
+             * Velocity Animaion
+             * https://github.com/julianshapiro/velocity/wiki/Basic---Arguments
+             */
+            Velocity(this.$refs.main, {
+                scrollLeft: this.$el.scrollLeft + movin+'px'
+            },{
+                duration: this.StickySpeed,
+                easing: "easeInOut"
+            })
 
         },
         getLeftItem(){
