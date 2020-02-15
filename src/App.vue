@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { lumiCaroucel, lumiCaroucelSlide } from './luminus/components'
+import { lumiCaroucel, lumiCaroucelSlide } from '../luminus/dist/luminus'
 
 export default {
     name: 'App',
@@ -68,6 +68,5 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import 'luminus/luminus'
 
 </style>
