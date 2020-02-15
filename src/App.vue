@@ -14,11 +14,10 @@
                     v-for="(item, index) in items"
                     :key="index"
                     :ref="'item_num_'+index">
-                    <!-- v-on:mounted="callback"> -->
 
-                    <button>
-                        <!-- @click="getOffsetWidth($event)"> -->
-                        {{ item.name }}
+                    <button
+                        @click.capture="childClick(item)">
+                        {{ item.name }} {{ item.clicked }}
                     </button>
 
                 </lumiCaroucelSlide>
@@ -44,7 +43,8 @@ export default {
             for (let index = 0; index < _num; index++) {
                 arr.push({
                     'index' : index,
-                    'name' : '테스트_'+(index+1)
+                    'name' : '테스트_'+(index+1),
+                    'clicked' : true,
                 })
             }
             return arr
@@ -54,12 +54,14 @@ export default {
         }
     },
     methods:{
-        // getOffsetWidth(event){
-        //     console.log("OffsetLeft =>", event.target.offsetLeft)
-        // },
-        // callback(slide){
-        //     console.log("offsetLeft => ", slide)
-        // }
+        childClick(item){
+            event.stopPropagation()
+
+            item.clicked = !item.clicked
+            console.log("item Clicked!!")
+
+            
+        },
     }
 }
 </script>
