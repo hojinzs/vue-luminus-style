@@ -1,5 +1,5 @@
 <template>
-    <li class="lumi-flex-slider-item">
+    <li class="lumi-flex-slider-item lumi-caroucel-item">
         <a>
             <slot>
             </slot>

@@ -13,11 +13,11 @@
                 <lumiCaroucelSlide
                     v-for="(item, index) in items"
                     :key="index"
-                    :ref="'item_num_'+index"
-                    v-on:mounted="callback">
+                    :ref="'item_num_'+index">
+                    <!-- v-on:mounted="callback"> -->
 
-                    <button
-                        @click="getOffsetWidth($event)">
+                    <button>
+                        <!-- @click="getOffsetWidth($event)"> -->
                         {{ item.name }}
                     </button>
 
@@ -50,16 +50,16 @@ export default {
             return arr
         }
         return {
-            items: items(20)
+            items: items(200)
         }
     },
     methods:{
-        getOffsetWidth(event){
-            console.log("OffsetLeft =>", event.target.offsetLeft)
-        },
-        callback(slide){
-            console.log("offsetLeft => ", slide)
-        }
+        // getOffsetWidth(event){
+        //     console.log("OffsetLeft =>", event.target.offsetLeft)
+        // },
+        // callback(slide){
+        //     console.log("offsetLeft => ", slide)
+        // }
     }
 }
 </script>
