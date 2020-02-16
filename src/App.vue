@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { lumiCaroucel, lumiCaroucelSlide } from '../luminus/dist/luminus'
+import { lumiCaroucel, lumiCaroucelSlide } from '../luminus/components'
 
 export default {
     name: 'App',
