@@ -4,22 +4,34 @@
             <h1>Luminus UI Sample</h1>
             <hr>
         </div>
-        <div>
+        <div id="Caroucel" style="background-color: grey">
 
             <h2>Caroucel Sample</h2>
 
             <lumiCaroucel
-                :speedStiky="300">
+                :speedStiky="'fast'"
+                :positionStiky="'center'">
 
                 <lumiCaroucelSlide
                     v-for="(item, index) in items"
                     :key="index"
                     :ref="'item_num_'+index">
 
-                    <button
-                        @click="childClick(item)">
-                        {{ item.name }} {{ item.clicked }}
-                    </button>
+                    <div class="caroucel-item lumi-box">
+                        <div>
+                            <h3> {{ item.name }} </h3>
+                        </div>
+                        <div>
+                            <img src="https://picsum.photos/350/200">
+                        </div>
+                        <div>
+                            Toggled ::
+                            <button
+                                @click="childClick(item)">
+                                {{ item.clicked }}
+                            </button>
+                        </div>
+                    </div>
 
                 </lumiCaroucelSlide>
 
@@ -51,7 +63,7 @@ export default {
             return arr
         }
         return {
-            items: items(200)
+            items: items(30)
         }
     },
     methods:{
@@ -68,5 +80,10 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../luminus/luminus'
 
+#Caroucel
+    height 60vh
+    .caroucel-item
+        width 400px
 </style>

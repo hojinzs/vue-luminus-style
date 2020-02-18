@@ -24,6 +24,7 @@ export default {
         }
     },
     mounted(){
+        // console.log(this.$el)
         this.offsetLeft = this.$el.offsetLeft
 
         this.$emit('mounted',this)

@@ -5,9 +5,11 @@
         @mousemove="sliderMoveHandler($event)"
         @mouseup="sliderMoveFinishHandler($event)"
         @mouseleave="sliderMoveFinishHandler($event)"
-        @scroll="sliderScrollHandler">
-        <ul class="lumi-flex-slider" ref="slider">
+        @scroll.prevent="sliderScrollHandler($event)">
+        <ul class="lumi-flex-slider">
+            <slot name="loading"></slot>
             <slot></slot>
+            <slot name="finish"></slot>
         </ul>
     </div>
 </template>
@@ -23,35 +25,64 @@ export default {
             default: true
         },
         speedStiky: {
-            default: 200,
-            validator: function(value){
-                let check
-                switch (value) {
-                    case typeof(value) == Number :
-                        check = true
-                        break;
-
-                    case 'slow' :
-                        check = true
-                        break;
-
-                    case 'nomal' :
-                        check = true
-                        break;
-
-                    case 'fase' :
-                        check = true
-                        break;
-
-                    default:
-                        check = false
-                        break;
+            default: 300,
+            validator: function(_val){
+                if(typeof(_val) == 'number') return true
+                if(typeof(_val) == 'string'){
+                    let modeList = ['slow','nomal','fast']
+                    return modeList.filter(mode => mode == _val ).length > 0
                 }
-                return check
+                return false
             }
+        },
+        positionStiky: {
+            type: String,
+            default: 'left',
+            validator: function(_val){
+                let modeList = ['left','center','right']
+                return modeList.filter(mode => mode == _val ).length > 0
+            }
+        },
+        paddingSize : {
+            type: Number,
+            default: 50
         }
     },
     data(){
+        let setStickySpeed = function(_val){
+            let min = 100,              //최소 0.1초  
+                max = 1000,             //최대 1초
+                default_speed = 300,    // 기본 스피드 0.3
+                speed = default_speed
+
+            if(typeof(_val) == 'number'){
+                if(_val < min) speed = min
+                if(_val > max) speed = max
+                speed = _val
+            }
+
+            if(typeof(_val) == 'string'){
+                switch (_val) {
+                    case 'slow':
+                        speed = max
+                        break;
+
+                    case 'nomal':
+                        speed = default_speed
+                        break
+                    
+                    case 'fast':
+                        speed = min
+                        break
+                
+                    default:
+                        speed = default_speed
+                        break;
+                }
+            }
+            return speed
+        }
+
         return {
             scrollX : 0,
             paddingLeft : 0,
@@ -61,17 +92,18 @@ export default {
                 startPosition : 0,
             },
             SliderMoving: false,
-            StickySpeed : this.speedStiky
+            StickySpeed : setStickySpeed(this.speedStiky),
+            slideFocused : 0,
         }
     },
     methods:{
-        clickCapture(event){
-            console.log(event)
-        },
-        sliderFocusOn(event){
+        // clickCapture(event){
+        //     console.log(event)
+        // },
+        sliderFocusOn($event){
             if(this.SliderMoving == false) {
                 this.mouseEvent.isMoving = true
-                this.mouseEvent.startPosition = event.clientX
+                this.mouseEvent.startPosition = $event.clientX
             }
         },
         sliderMoveHandler($event){
@@ -86,7 +118,9 @@ export default {
             }
         },
         sliderMoveFinishHandler(){
-            if(this.mouseEvent.isMoving == true){                
+            if(this.mouseEvent.isMoving == true){
+
+                // console.log("Finish Handler Captured!")
                 this.mouseEvent.isMoving = false
                 this.mouseEvent.movedX = 0
                 
@@ -94,52 +128,121 @@ export default {
             }
         },
         sliderScrollHandler(){
-            if(!this.mouseEvent.isMoving && !this.SliderMoving){
 
-                let time = 100
+            // console.log("Scroll Captured!!")
 
-                clearTimeout(this.SlierTimeout)
-                this.SlierTimeout = setTimeout(() => {
-                    this.doItemStiky()
-                },time)
-            }
+            // $event.preventDefault();
+            // $event.stopPropagation();            
+            // if(!this.mouseEvent.isMoving && !this.SliderMoving){
+            //     let time = 400
+            //     clearTimeout(this.SlierTimeout)
+            //     this.SlierTimeout = setTimeout(() => {
+            //         this.doItemStiky()
+            //     },time)
+            // }
         },
         doItemStiky(_item){
-            if(!_item) _item = this.getLeftItem()
+            let movin
 
-            let movin           = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
+            switch (this.positionStiky) {
+                case 'left':
+                    if(!_item) _item = this.getStickyItem('left')
+                    movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
+                    break;
+
+                case 'center':
+                    if(!_item) _item = this.getStickyItem('center')
+                    movin = (_item.offsetLeft + ( _item.offsetWidth / 2) ) - ( this.$el.scrollLeft + ( this.$el.offsetWidth / 2 ) )
+                    break
+
+                case 'right':
+                    if(!_item) _item = this.getStickyItem('right')
+                    movin = (_item.offsetLeft + _item.offsetWidth) - ( this.$el.scrollLeft + this.$el.offsetWidth ) // 대상 엘리먼트에서 보이지 않는 부분을 계산함 (-20)
+                    break;
+                    
+                default: //기본값 : left와 동일
+                    if(!_item) _item = this.getStickyItem('left')
+                    movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
+                    break;
+            }
 
             /**
              * Velocity Animaion
              * https://github.com/julianshapiro/velocity/wiki/Basic---Arguments
              */
             Velocity(this.$refs.main, {
-                scrollLeft: this.$el.scrollLeft + movin+'px'
+                scrollLeft: this.$el.scrollLeft+movin+'px'
             },{
                 duration: this.StickySpeed,
-                easing: "easeInOut"
+                easing: "easeInOut",
+                begin:() => { this.SliderMoving = true },
+                complete: () => { this.SliderMoving = false },
             })
 
         },
-        getLeftItem(){
+        getStickyItem(_position = this.positionStiky){
             let arr = this.$el.getElementsByClassName('lumi-caroucel-item'),
                 get_element,
                 get_near
+            
+            switch (_position) {
+                case 'left':
+                    arr.forEach(element => {
+                        let near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
 
-            arr.forEach(element => {
-                let near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
+                        if(get_near == null || get_near > near){
+                            get_near = near
+                            get_element = element 
+                        }
+                    });
+                    break;
 
-                if(get_near == null || get_near > near){
-                    get_near = near
-                    get_element = element 
-                }
-            });
+                case 'center':
+
+                    arr.forEach(element => {
+                        let near = Math.abs( (this.$el.scrollLeft + ( this.$el.clientWidth / 2) ) - ( element.offsetLeft + ( element.offsetWidth / 2) ) )
+
+                        if(get_near == null || get_near > near){
+                            get_near = near
+                            get_element = element 
+                        }
+                    });
+
+                    break;
+
+                case 'right':
+                    arr.forEach(element => {
+                        let near = Math.abs( (this.$el.scrollLeft + this.$el.clientWidth) - ( element.offsetLeft + element.offsetWidth ) )
+
+                        if(get_near == null || get_near > near){
+                            get_near = near
+                            get_element = element 
+                        }
+                    });
+                    break;
+
+                default: //left와 동일
+                    arr.forEach(element => {
+                        let near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
+
+                        if(get_near == null || get_near > near){
+                            get_near = near
+                            get_element = element 
+                        }
+                    });
+                    break;
+            }
+
+            // console.log("Get Item from '"+_position+"' => ",get_element)
 
             return get_element
         },
+        setOffsetLeft(){
+            this.paddingLeft = this.paddingSize
+        }
     },
     mounted(){
-        this.paddingLeft = this.getLeftItem().offsetLeft
+        this.setOffsetLeft()
     }
 }
 </script>
