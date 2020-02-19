@@ -246,7 +246,7 @@ export default {
                 current = this.$el.getElementsByClassName('lumi-caroucel-item activate')[0]
 
             if(current) {
-                console.log(current)
+                // console.log(current)
                 current.classList.remove('activate')
             }
             if(arr.length > 0) {

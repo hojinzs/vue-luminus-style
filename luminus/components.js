@@ -1,12 +1,14 @@
-import lumiCaroucel from './components/lumi-carousel'
-import lumiCaroucelSlide from './components/lumi-carousel-slide'
+// import Vue from 'vue'
 
-// const install = Vue => {
-//     Vue.component('lumiCaroucel', lumiCaroucel);
-//     Vue.component('lumiCaroucelSlide', lumiCaroucelSlide);
-// }
+import lumiCaroucel from './components/lumi-carousel.vue'
+import lumiCaroucelSlide from './components/lumi-carousel-slide.vue'
 
-// export default { install }
+const install = Vue => {
+    Vue.component('lumiCaroucel', lumiCaroucel);
+    Vue.component('lumiCaroucelSlide', lumiCaroucelSlide);
+}
+
+export default install
 
 export {
     lumiCaroucel,

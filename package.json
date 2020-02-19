@@ -1,24 +1,26 @@
 {
   "name": "vue-luminus-style",
   "version": "0.1.0",
-  "private": true,
+  "main": "dist/luminus.js",
+  "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "webpack --mode production",
+    "export": "webpack-cli --config webpack.config.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "core-js": "^3.6.4",
-    "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2",
-    "velocity-animate": "^2.0.5",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "velocity-animate": "^2.0.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.2.0",
     "@vue/cli-plugin-eslint": "^4.2.0",
     "@vue/cli-plugin-router": "^4.2.2",
     "@vue/cli-service": "^4.2.0",
+    "core-js": "^3.6.4",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.3",
     "babel-preset-env": "^1.7.0",
@@ -31,7 +33,7 @@
     "webpack-cli": "^3.3.11"
   },
   "eslintConfig": {
-    "root": true,
+    "root": false,
     "env": {
       "node": true
     },
@@ -42,7 +44,8 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {}
+    "rules": {
+    }
   },
   "browserslist": [
     "> 1%",

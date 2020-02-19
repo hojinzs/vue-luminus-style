@@ -8,8 +8,8 @@ module.exports = {
     output: {
         path: path.resolve(__dirname + '/dist'),
         filename: 'luminus.js',
-        // library: 'lumi-carousel',
-        // libraryTarget: 'umd',
+        library: 'Luminus',
+        libraryTarget: 'umd',
         // umdNamedDefine: true
     },
     module: {
@@ -18,16 +18,13 @@ module.exports = {
                 test: /\.vue$/,
                 use: 'vue-loader',
             },
-            // {
-            //     test: /\.js$/,
-            //     exclude: /node_modules/,
-            //     use: {
-            //         loader: 'babel-loader',
-            //         options: {
-            //             presets: ['@babel/preset-env']
-            //         }
-            //     },
-            // },
+            {
+                test: /\.js$/,
+                use: {
+                    loader: 'babel-loader',
+                },
+                exclude: /node_modules/,
+            },
             {
                 test: /\.styl(us)?$/,
                 use: [
