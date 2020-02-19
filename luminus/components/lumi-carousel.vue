@@ -94,6 +94,7 @@ export default {
             SliderMoving: false,
             StickySpeed : setStickySpeed(this.speedStiky),
             slideFocused : 0,
+            childrenSlide : []
         }
     },
     methods:{
@@ -239,10 +240,58 @@ export default {
         },
         setOffsetLeft(){
             this.paddingLeft = this.paddingSize
+        },
+        doItemFocus(_itemNumber){
+            let arr = this.$el.getElementsByClassName('lumi-caroucel-item'),
+                current = this.$el.getElementsByClassName('lumi-caroucel-item activate')[0]
+
+            if(current) {
+                console.log(current)
+                current.classList.remove('activate')
+            }
+            if(arr.length > 0) {
+                let focusItem = arr[_itemNumber]
+                focusItem.classList.add('activate')
+                this.doItemStiky(focusItem)
+            }
+        },
+        setChildren(){
+            this.childrenSlide = this.$el.getElementsByClassName('lumi-caroucel-item')
+        },
+        setMoveFocus(_direction = null){
+
+            switch (_direction) {
+                case 'left':
+                case 'center':
+                    if( this.slideFocused >= this.childrenSlide.length){
+                        this.slideFocused = 0
+                    } else {
+                        ++ this.slideFocused
+                    }
+                    break;
+
+                case 'right':
+                    if( this.slideFocused >= this.childrenSlide.length){
+                        this.slideFocused = 0
+                    } else {
+                        ++ this.slideFocused
+                    }
+                    break;
+
+                default:
+                    break;
+            }
         }
     },
     mounted(){
+        this.setChildren()
         this.setOffsetLeft()
+        this.doItemFocus(this.slideFocused)
+    },
+    watch: {
+        slideFocused(_focusingNumber){
+            this.doItemFocus(_focusingNumber)
+        }
     }
 }
 </script>
@@ -250,5 +299,6 @@ export default {
 <style lang="stylus" scoped>
 @import '../luminus'
 
-
+.activate
+    border 1px solid red
 </style>

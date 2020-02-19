@@ -51,7 +51,12 @@ export default {
         lumiCaroucelSlide
     },
     data(){
-        let items = function(_num = 2){
+        return {
+            items: []
+        }
+    },
+    methods:{
+        setItems(_num){
             let arr = new Array
             for (let index = 0; index < _num; index++) {
                 arr.push({
@@ -61,20 +66,17 @@ export default {
                 })
             }
             return arr
-        }
-        return {
-            items: items(30)
-        }
-    },
-    methods:{
-        childClick(item){
-            event.stopPropagation()
-
-            item.clicked = !item.clicked
-            console.log("item Clicked!!")
-
-            
         },
+        childClick(item){
+            item.clicked = !item.clicked
+            console.log("item Clicked!!")           
+        },
+    },
+    mounted(){
+        /** 비동기 인풋에 대한 대응 */
+        setTimeout(() => {
+            this.items = this.setItems(20)
+        },2000)
     }
 }
 </script>
