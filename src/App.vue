@@ -9,7 +9,7 @@
             <h2>Caroucel Sample</h2>
 
             <lumiCaroucel
-                :speedStiky="'fast'"
+                :speedStiky="'nomal'"
                 :positionStiky="'center'">
 
                 <lumiCaroucelSlide
@@ -73,6 +73,7 @@ export default {
         },
     },
     mounted(){
+        // this.items = this.setItems(20)
         /** 비동기 인풋에 대한 대응 */
         setTimeout(() => {
             this.items = this.setItems(20)
@@ -88,4 +89,6 @@ export default {
     height 60vh
     .caroucel-item
         width 400px
+    .box
+        background-color white
 </style>

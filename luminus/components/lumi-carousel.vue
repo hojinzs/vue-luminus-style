@@ -1,11 +1,11 @@
 <template>
     <div class="lumi-flex-slider-wrapper" ref="main"
-        @click.stop.prevent
+        v-touch:swipe="touchSwipeHandler"
+        @touchstart="touchStartHandler"
         @mousedown="sliderFocusOn($event)"
         @mousemove="sliderMoveHandler($event)"
         @mouseup="sliderMoveFinishHandler($event)"
-        @mouseleave="sliderMoveFinishHandler($event)"
-        @scroll.prevent="sliderScrollHandler($event)">
+        @mouseleave="sliderMoveFinishHandler($event)">
         <ul class="lumi-flex-slider">
             <slot name="loading"></slot>
             <slot></slot>
@@ -15,7 +15,11 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import Velocity from 'velocity-animate'
+import Vue2TouchEvents from 'vue2-touch-events'
+ 
+Vue.use(Vue2TouchEvents)
 
 export default {
     name: 'lumi-carousel',
@@ -86,6 +90,10 @@ export default {
         return {
             scrollX : 0,
             paddingLeft : 0,
+            touchEvent : {
+                isSwipe : false,
+                swipeTolerance : 500
+            },
             mouseEvent : {
                 isMoving : false,
                 movedX : 0,
@@ -98,13 +106,42 @@ export default {
         }
     },
     methods:{
-        // clickCapture(event){
-        //     console.log(event)
-        // },
+        clickCapture(_message){
+            console.log(_message)
+        },
+        touchStartHandler(){
+            this.touchEvent.isSwipe = true,
+            setTimeout(() => {
+                this.touchEvent.isSwipe = false
+            },this.touchEvent.swipeTolerance)
+        },
+        touchSwipeHandler(_direction){
+            console.log("Swipe => ",_direction)
+            if(this.SliderMoving == false && this.touchEvent.isSwipe == true) {
+
+                switch (_direction) {
+                    case 'left':
+                        this.setMoveFocus('left')
+                        break;
+
+                    case 'right':
+                        this.setMoveFocus('right')
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        },
         sliderFocusOn($event){
             if(this.SliderMoving == false) {
                 this.mouseEvent.isMoving = true
                 this.mouseEvent.startPosition = $event.clientX
+
+                this.touchEvent.isSwipe = true,
+                setTimeout(() => {
+                    this.touchEvent.isSwipe = false
+                },this.touchEvent.swipeTolerance)
             }
         },
         sliderMoveHandler($event){
@@ -125,44 +162,32 @@ export default {
                 this.mouseEvent.isMoving = false
                 this.mouseEvent.movedX = 0
                 
-                if(this.itemStiky) this.doItemStiky()
+                if(this.itemStiky && this.touchEvent.isSwipe == false) {
+                    this.doItemFocus(this.getStickyItem(true))
+                }
             }
-        },
-        sliderScrollHandler(){
-
-            // console.log("Scroll Captured!!")
-
-            // $event.preventDefault();
-            // $event.stopPropagation();            
-            // if(!this.mouseEvent.isMoving && !this.SliderMoving){
-            //     let time = 400
-            //     clearTimeout(this.SlierTimeout)
-            //     this.SlierTimeout = setTimeout(() => {
-            //         this.doItemStiky()
-            //     },time)
-            // }
         },
         doItemStiky(_item){
             let movin
 
             switch (this.positionStiky) {
                 case 'left':
-                    if(!_item) _item = this.getStickyItem('left')
+                    if(!_item) _item = this.getStickyItem(false,'left')
                     movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
                     break;
 
                 case 'center':
-                    if(!_item) _item = this.getStickyItem('center')
+                    if(!_item) _item = this.getStickyItem(false,'center')
                     movin = (_item.offsetLeft + ( _item.offsetWidth / 2) ) - ( this.$el.scrollLeft + ( this.$el.offsetWidth / 2 ) )
                     break
 
                 case 'right':
-                    if(!_item) _item = this.getStickyItem('right')
+                    if(!_item) _item = this.getStickyItem(false,'right')
                     movin = (_item.offsetLeft + _item.offsetWidth) - ( this.$el.scrollLeft + this.$el.offsetWidth ) // 대상 엘리먼트에서 보이지 않는 부분을 계산함 (-20)
                     break;
                     
                 default: //기본값 : left와 동일
-                    if(!_item) _item = this.getStickyItem('left')
+                    if(!_item) _item = this.getStickyItem(false,'left')
                     movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
                     break;
             }
@@ -176,65 +201,50 @@ export default {
             },{
                 duration: this.StickySpeed,
                 easing: "easeInOut",
-                begin:() => { this.SliderMoving = true },
-                complete: () => { this.SliderMoving = false },
+                begin:() => {
+                    this.SliderMoving = true 
+                },
+                complete: () => {
+                    this.SliderMoving = false
+                },
             })
 
         },
-        getStickyItem(_position = this.positionStiky){
+        getStickyItem(_returnIndex = true,_position = this.positionStiky){
             let arr = this.$el.getElementsByClassName('lumi-caroucel-item'),
                 get_element,
+                get_index,
                 get_near
-            
-            switch (_position) {
-                case 'left':
-                    arr.forEach(element => {
-                        let near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
 
-                        if(get_near == null || get_near > near){
-                            get_near = near
-                            get_element = element 
-                        }
-                    });
-                    break;
+            arr.forEach((element,index) => {
 
-                case 'center':
+                let near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
 
-                    arr.forEach(element => {
-                        let near = Math.abs( (this.$el.scrollLeft + ( this.$el.clientWidth / 2) ) - ( element.offsetLeft + ( element.offsetWidth / 2) ) )
+                switch (_position) {
+                    case 'left':
+                        near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
+                        break;
 
-                        if(get_near == null || get_near > near){
-                            get_near = near
-                            get_element = element 
-                        }
-                    });
+                    case 'center':
+                        near = Math.abs( (this.$el.scrollLeft + ( this.$el.clientWidth / 2) ) - ( element.offsetLeft + ( element.offsetWidth / 2) ) )
+                        break;
 
-                    break;
+                    case 'right':
+                        near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
+                        break;
+                }
 
-                case 'right':
-                    arr.forEach(element => {
-                        let near = Math.abs( (this.$el.scrollLeft + this.$el.clientWidth) - ( element.offsetLeft + element.offsetWidth ) )
+                if(get_near == null || get_near > near){
+                    get_near = near
+                    get_index = index 
+                    get_element = element 
+                }
+            });
 
-                        if(get_near == null || get_near > near){
-                            get_near = near
-                            get_element = element 
-                        }
-                    });
-                    break;
 
-                default: //left와 동일
-                    arr.forEach(element => {
-                        let near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
-
-                        if(get_near == null || get_near > near){
-                            get_near = near
-                            get_element = element 
-                        }
-                    });
-                    break;
+            if(_returnIndex == true){
+                return get_index
             }
-
-            // console.log("Get Item from '"+_position+"' => ",get_element)
 
             return get_element
         },
@@ -249,11 +259,16 @@ export default {
                 // console.log(current)
                 current.classList.remove('activate')
             }
+
             if(arr.length > 0) {
                 let focusItem = arr[_itemNumber]
                 focusItem.classList.add('activate')
                 this.doItemStiky(focusItem)
+
+                return true
             }
+
+            return false
         },
         setChildren(){
             this.childrenSlide = this.$el.getElementsByClassName('lumi-caroucel-item')
@@ -263,7 +278,7 @@ export default {
             switch (_direction) {
                 case 'left':
                 case 'center':
-                    if( this.slideFocused >= this.childrenSlide.length){
+                    if( this.slideFocused >= ( this.childrenSlide.length - 1) ){
                         this.slideFocused = 0
                     } else {
                         ++ this.slideFocused
@@ -271,10 +286,10 @@ export default {
                     break;
 
                 case 'right':
-                    if( this.slideFocused >= this.childrenSlide.length){
-                        this.slideFocused = 0
+                    if( this.slideFocused <= 0){
+                        this.slideFocused = ( this.childrenSlide.length - 1)
                     } else {
-                        ++ this.slideFocused
+                        --this.slideFocused
                     }
                     break;
 
