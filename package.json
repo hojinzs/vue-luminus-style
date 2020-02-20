@@ -7,9 +7,11 @@
     "serve": "vue-cli-service serve",
     "build": "webpack --mode production",
     "export": "webpack-cli --config webpack.config.js",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "postinstall": "postinstall-build lib --script export"
   },
   "dependencies": {
+    "postinstall-build": "^5.0.3",
     "velocity-animate": "^2.0.5",
     "vue": "^2.6.11",
     "vue2-touch-events": "^2.2.1"
