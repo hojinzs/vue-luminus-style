@@ -1,6 +1,6 @@
 <template>
     <li class="lumi-flex-slider-item lumi-caroucel-item">
-        <a>
+        <a class="wrapper" oncontextmenu="return false" ondragstart="return false" onselectstart="return false">
             <slot>
             </slot>
         </a>

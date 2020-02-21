@@ -9,13 +9,21 @@
             <h2>Caroucel Sample</h2>
 
             <lumiCaroucel
-                :speedStiky="'nomal'"
-                :positionStiky="'center'">
+                :speedStiky="600"
+                :positionStiky="'center'"
+                :async="true"
+                @loaded="setCaroucel">
 
                 <lumiCaroucelSlide
                     v-for="(item, index) in items"
                     :key="index"
                     :ref="'item_num_'+index">
+
+                    <template v-slot:loading>
+                        <div>
+                            Loading
+                        </div>
+                    </template>
 
                     <div class="caroucel-item lumi-box">
                         <div>
@@ -37,6 +45,11 @@
 
             </lumiCaroucel>
 
+            <div>
+                <h3>data change test</h3>
+                <input v-model="test"/> <button @click="setDataAsync()">PUSH DATA {{test}}</button>
+            </div>
+
         </div>
     </div>
 </template>
@@ -52,7 +65,9 @@ export default {
     },
     data(){
         return {
-            items: []
+            slide: Object,
+            items: [],
+            test: 10,
         }
     },
     methods:{
@@ -67,17 +82,26 @@ export default {
             }
             return arr
         },
+        setDataAsync(){
+            setTimeout(() => {
+                this.items = this.setItems(this.test)
+                console.log("Ajax Fisish => ",this.slide)
+                this.slide.setAsyncFinish()
+            },2000)
+        },
         childClick(item){
             item.clicked = !item.clicked
             console.log("item Clicked!!")           
         },
+        setCaroucel($slide){
+            console.log("Slide Mounted => ", $slide)
+            this.slide = $slide
+        }
     },
     mounted(){
         // this.items = this.setItems(20)
         /** 비동기 인풋에 대한 대응 */
-        setTimeout(() => {
-            this.items = this.setItems(20)
-        },2000)
+        this.setDataAsync()
     }
 }
 </script>

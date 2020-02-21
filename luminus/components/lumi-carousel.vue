@@ -6,15 +6,18 @@
         @mousemove="sliderMoveHandler($event)"
         @mouseup="sliderMoveFinishHandler($event)"
         @mouseleave="sliderMoveFinishHandler($event)">
-        <ul class="lumi-flex-slider">
-            <slot name="loading"></slot>
-            <slot></slot>
+        <ul class="lumi-flex-slider" ref="slide"
+            v-bind:style="{ transform: 'translateX('+transformX+'px)' }">
+            <slot name="loading" v-if="!asyncStatus.loadFinish">
+                Loading
+            </slot>
+            <slot v-if="asyncStatus.loadFinish"></slot>
             <slot name="finish"></slot>
         </ul>
     </div>
 </template>
-
 <script>
+// // transform: translateX(100px)
 import Vue from 'vue'
 import Velocity from 'velocity-animate'
 import Vue2TouchEvents from 'vue2-touch-events'
@@ -29,7 +32,7 @@ export default {
             default: true
         },
         speedStiky: {
-            default: 300,
+            default: 1000,
             validator: function(_val){
                 if(typeof(_val) == 'number') return true
                 if(typeof(_val) == 'string'){
@@ -47,15 +50,15 @@ export default {
                 return modeList.filter(mode => mode == _val ).length > 0
             }
         },
-        paddingSize : {
-            type: Number,
-            default: 50
+        async:{
+            type: Boolean,
+            default: false
         }
     },
     data(){
         let setStickySpeed = function(_val){
             let min = 100,              //최소 0.1초  
-                max = 1000,             //최대 1초
+                max = 800,              //최대 0.8초
                 default_speed = 300,    // 기본 스피드 0.3
                 speed = default_speed
 
@@ -88,21 +91,25 @@ export default {
         }
 
         return {
+            transformX: 0,
             scrollX : 0,
             paddingLeft : 0,
             touchEvent : {
                 isSwipe : false,
-                swipeTolerance : 500
+                swipeTolerance : 400
             },
             mouseEvent : {
                 isMoving : false,
                 movedX : 0,
                 startPosition : 0,
             },
+            asyncStatus: {
+                loadFinish: !this.async
+            },
             SliderMoving: false,
             StickySpeed : setStickySpeed(this.speedStiky),
             slideFocused : 0,
-            childrenSlide : []
+            childrenSlide : this.$children
         }
     },
     methods:{
@@ -136,7 +143,8 @@ export default {
         sliderFocusOn($event){
             if(this.SliderMoving == false) {
                 this.mouseEvent.isMoving = true
-                this.mouseEvent.startPosition = $event.clientX
+                // this.mouseEvent.startPosition = $event.clientX
+                this.mouseEvent.movedX = $event.clientX
 
                 this.touchEvent.isSwipe = true,
                 setTimeout(() => {
@@ -146,9 +154,17 @@ export default {
         },
         sliderMoveHandler($event){
             if(this.mouseEvent.isMoving == true){
+                // let moved = this.mouseEvent.movedX - $event.clientX
                 let moved = this.mouseEvent.movedX - $event.clientX
+                
+                console.log("moved => ",moved)
 
-                this.$el.scrollLeft = this.$el.scrollLeft + this.mouseEvent.startPosition + moved
+                // this.$el.scrollLeft = this.$el.scrollLeft + this.mouseEvent.startPosition + moved 
+                this.transformX = this.transformX - moved
+
+                // let transformX = (this.transformX - moved)+"px"
+                // Velocity(this.$refs.slide, { translateX: transformX },1)
+
 
                 // clear
                 this.mouseEvent.movedX = $event.clientX
@@ -173,22 +189,27 @@ export default {
             switch (this.positionStiky) {
                 case 'left':
                     if(!_item) _item = this.getStickyItem(false,'left')
-                    movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
+                    // movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
+                    movin = _item.offsetLeft
                     break;
 
                 case 'center':
                     if(!_item) _item = this.getStickyItem(false,'center')
-                    movin = (_item.offsetLeft + ( _item.offsetWidth / 2) ) - ( this.$el.scrollLeft + ( this.$el.offsetWidth / 2 ) )
+                    // movin = (_item.offsetLeft + ( _item.offsetWidth / 2) ) - ( this.$el.scrollLeft + ( this.$el.offsetWidth / 2 ) )
+                    movin = -( this.$el.clientWidth / 2 ) + _item.offsetLeft + ( _item.offsetWidth / 2)
+                    console.log(this.$el.clientWidth, _item.offsetLeft,( _item.offsetWidth / 2))
                     break
 
                 case 'right':
                     if(!_item) _item = this.getStickyItem(false,'right')
-                    movin = (_item.offsetLeft + _item.offsetWidth) - ( this.$el.scrollLeft + this.$el.offsetWidth ) // 대상 엘리먼트에서 보이지 않는 부분을 계산함 (-20)
+                    // movin = (_item.offsetLeft + _item.offsetWidth) - ( this.$el.scrollLeft + this.$el.offsetWidth ) // 대상 엘리먼트에서 보이지 않는 부분을 계산함 (-20)
+                    movin = (_item.offsetLeft + _item.offsetWidth)
                     break;
                     
                 default: //기본값 : left와 동일
                     if(!_item) _item = this.getStickyItem(false,'left')
-                    movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
+                    // movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
+                    movin = _item.offsetLeft
                     break;
             }
 
@@ -196,18 +217,27 @@ export default {
              * Velocity Animaion
              * https://github.com/julianshapiro/velocity/wiki/Basic---Arguments
              */
-            Velocity(this.$refs.main, {
-                scrollLeft: this.$el.scrollLeft+movin+'px'
+            let transformX = -movin
+            // console.log(transformX) 
+            Velocity(this.$refs.slide, {
+                translateX: [transformX, this.transformX]
             },{
                 duration: this.StickySpeed,
-                easing: "easeInOut",
+                easing: "spring",
                 begin:() => {
+                    console.log("movin start")
                     this.SliderMoving = true 
                 },
                 complete: () => {
+                    console.log("movin end")
+                    this.transformX = transformX
                     this.SliderMoving = false
                 },
             })
+
+            // this.transformX = transformX
+
+            return this
 
         },
         getStickyItem(_returnIndex = true,_position = this.positionStiky){
@@ -222,14 +252,17 @@ export default {
 
                 switch (_position) {
                     case 'left':
-                        near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
+                        // near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
+                        near = Math.abs(this.transformX + element.offsetLeft)
                         break;
 
                     case 'center':
-                        near = Math.abs( (this.$el.scrollLeft + ( this.$el.clientWidth / 2) ) - ( element.offsetLeft + ( element.offsetWidth / 2) ) )
+                        // near = Math.abs( (this.$el.scrollLeft + ( this.$el.clientWidth / 2) ) - ( element.offsetLeft + ( element.offsetWidth / 2) ) )
+                        near = Math.abs( ( this.transformX - ( this.$el.clientWidth / 2 ) ) + ( element.offsetLeft + ( element.offsetWidth / 2) ) )
                         break;
 
                     case 'right':
+                        // near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
                         near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
                         break;
                 }
@@ -248,30 +281,20 @@ export default {
 
             return get_element
         },
-        setOffsetLeft(){
-            this.paddingLeft = this.paddingSize
-        },
-        doItemFocus(_itemNumber){
+        doItemFocus(_itemNumber = 0){
             let arr = this.$el.getElementsByClassName('lumi-caroucel-item'),
                 current = this.$el.getElementsByClassName('lumi-caroucel-item activate')[0]
 
-            if(current) {
-                // console.log(current)
-                current.classList.remove('activate')
-            }
+            if(current) current.classList.remove('activate')
 
             if(arr.length > 0) {
                 let focusItem = arr[_itemNumber]
                 focusItem.classList.add('activate')
+                console.log(">> doItemFocus",focusItem)
                 this.doItemStiky(focusItem)
-
-                return true
             }
 
-            return false
-        },
-        setChildren(){
-            this.childrenSlide = this.$el.getElementsByClassName('lumi-caroucel-item')
+            return this
         },
         setMoveFocus(_direction = null){
 
@@ -296,16 +319,33 @@ export default {
                 default:
                     break;
             }
-        }
+
+            return this
+        },
+        setAsyncFinish(){
+            this.asyncStatus.loadFinish = true
+            // this.setChildren()
+            this.doItemFocus(0)
+
+            console.log("AsyncFinished")
+            return this
+        },
     },
     mounted(){
-        this.setChildren()
-        this.setOffsetLeft()
+        // this.setChildren()
         this.doItemFocus(this.slideFocused)
+
+        this.$emit('loaded',this)
     },
     watch: {
         slideFocused(_focusingNumber){
             this.doItemFocus(_focusingNumber)
+        },
+        childrenSlide(_newSlide){
+            console.log("Slide Changed => ",_newSlide)
+            
+            if(this.asyncStatus.loadFinish == false) this.asyncStatus.loadFinish = true
+            this.doItemFocus(this.focusItem)
         }
     }
 }
