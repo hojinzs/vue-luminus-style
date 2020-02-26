@@ -18,7 +18,6 @@
     </div>
 </template>
 <script>
-// // transform: translateX(100px)
 import Vue from 'vue'
 import Velocity from 'velocity-animate'
 import Vue2TouchEvents from 'vue2-touch-events'
@@ -112,7 +111,10 @@ export default {
                 loadFinish: !this.async
             },
             SliderMoving: false,
-            StickySpeed : setStickySpeed(this.speedStiky),
+            stickyAnimation: {
+                speed : setStickySpeed(this.speedStiky),
+                easing : "spring"
+            },
             slideFocused : 0,
             childrenSlide : this.$children
         }
@@ -167,9 +169,6 @@ export default {
                 // this.$el.scrollLeft = this.$el.scrollLeft + this.mouseEvent.startPosition + moved 
                 this.transformX = this.transformX - moved
 
-                // let transformX = (this.transformX - moved)+"px"
-                // Velocity(this.$refs.slide, { translateX: transformX },1)
-
 
                 // clear
                 this.mouseEvent.movedX = $event.clientX
@@ -189,6 +188,9 @@ export default {
             }
         },
         doItemStiky(_item){
+
+            if(this.SliderMoving) return this
+
             let movin
 
             switch (this.positionStiky) {
@@ -227,8 +229,8 @@ export default {
             Velocity(this.$refs.slide, {
                 translateX: [transformX, this.transformX]
             },{
-                duration: this.StickySpeed,
-                easing: "spring",
+                duration: this.stickyAnimation.speed,
+                easing: this.stickyAnimation.easing,
                 begin:() => {
                     console.log("movin start")
                     this.SliderMoving = true 
@@ -333,10 +335,7 @@ export default {
         },
         setAsyncFinish(){
             this.asyncStatus.loadFinish = true
-            // this.setChildren()
             this.doItemFocus(0)
-
-            console.log("AsyncFinished")
             return this
         },
     },

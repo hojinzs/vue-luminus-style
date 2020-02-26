@@ -118,7 +118,7 @@ export default {
         setDataAsync(){
             setTimeout(() => {
                 this.items = this.setItems(this.test)
-                console.log("Ajax Fisish => ",this.slide)
+                // console.log("Ajax Fisish => ",this.slide)
                 this.slide.setAsyncFinish()
             },2000)
         },
@@ -151,8 +151,8 @@ export default {
     .caroucel
         margin-left -1em
         margin-right -1em
-    .activate
-        border 1px solid red
+    // .activate
+    //     border 1px solid red
 
 #Card
     #lumi-card
