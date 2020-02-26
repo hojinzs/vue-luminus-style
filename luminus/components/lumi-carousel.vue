@@ -286,10 +286,15 @@ export default {
             return get_element
         },
         doItemFocus(_itemNumber = 0){
+            if(this.slideFocused !== _itemNumber) {
+                this.slideFocused = _itemNumber
+                return
+            }
+
             let arr = this.$el.getElementsByClassName('lumi-caroucel-item'),
                 current = this.$el.getElementsByClassName('lumi-caroucel-item activate')[0]
 
-            if(current) current.classList.remove('activate')
+            if(current) current.classList.remove('activate') 
 
             if(arr.length > 0) {
                 let focusItem = arr[_itemNumber]
