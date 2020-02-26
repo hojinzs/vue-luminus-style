@@ -4,62 +4,88 @@
             <h1>Luminus UI Sample</h1>
             <hr>
         </div>
-        <div id="Caroucel" style="background-color: grey">
+        <section id="Caroucel" class="section">
 
             <h2>Caroucel Sample</h2>
 
-            <lumiCaroucel
-                :speedStiky="600"
-                :positionStiky="'center'"
-                :async="true"
-                @loaded="setCaroucel">
+            <div class="caroucel">
 
-                <lumiCaroucelSlide
-                    v-for="(item, index) in items"
-                    :key="index"
-                    :ref="'item_num_'+index">
+                <lumiCaroucel
+                    :speedStiky="600"
+                    :positionStiky="'center'"
+                    :async="true"
+                    @loaded="setCaroucel"
+                    @focused="getFocus">
 
-                    <template v-slot:loading>
-                        <div>
-                            Loading
-                        </div>
-                    </template>
+                    <lumiCaroucelSlide
+                        v-for="(item, index) in items"
+                        :key="index"
+                        :ref="'item_num_'+index">
 
-                    <div class="caroucel-item lumi-box">
-                        <div>
-                            <h3> {{ item.name }} </h3>
-                        </div>
-                        <div>
-                            <img src="https://picsum.photos/350/200">
-                        </div>
-                        <div>
-                            Toggled ::
-                            <button
-                                @click="childClick(item)">
-                                {{ item.clicked }}
-                            </button>
-                        </div>
-                    </div>
+                        <template v-slot:loading>
+                            <div>
+                                Loading
+                            </div>
+                        </template>
 
-                </lumiCaroucelSlide>
+                        <lumiCard id="lumi-card"
+                            :img_url="'https://picsum.photos/320/200'">
+                            <template v-slot:header>
+                                <h3> {{ item.name }} </h3>
+                            </template>
+                                Toggled ::
+                                <button
+                                    @click="childClick(item)">
+                                    {{ item.clicked }}
+                                </button>
+                        </lumiCard>
 
-            </lumiCaroucel>
+                    </lumiCaroucelSlide>
 
-            <div>
-                <h3>data change test</h3>
-                <input v-model="test"/> <button @click="setDataAsync()">PUSH DATA {{test}}</button>
+                </lumiCaroucel>
+
             </div>
 
-        </div>
+            <div>
+                <br>
+                <h3>Param Test</h3>
+                <div>
+                    <label for="carouel_focused">Items : </label>
+                    <input class="lumi-input-liner" name="" v-model="test"/>
+                    <button class="lumi-button-liner" @click="setDataAsync()">PUSH DATA</button>
+                </div>
+                <div>
+                    <label for="carouel_focused">Focused : </label>
+                    <input class="lumi-input-liner" name="carouel_focused" v-model="focus"/>
+                    <button class="lumi-button-liner" @click="setFocus()">Go Focus</button>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="Card" class="section">
+            <h2>Card UI Sample </h2>
+            <lumiCard id="lumi-card"
+                :header_title="'title'"
+                :headless="true"
+                :img_url="'https://picsum.photos/500/200'">
+                <template v-slot:header>
+                    헤더헤더
+                </template>
+                asdf<br>
+                asdf<br>
+            </lumiCard>
+        </section>
     </div>
 </template>
 
 <script>
-import { lumiCaroucel, lumiCaroucelSlide } from '../luminus/components'
+import { lumiCaroucel, lumiCaroucelSlide, lumiCard } from '../luminus/components'
 
 export default {
     name: 'App',
     components: {
+        lumiCard,
         lumiCaroucel,
         lumiCaroucelSlide
     },
@@ -68,9 +94,16 @@ export default {
             slide: Object,
             items: [],
             test: 10,
+            focus: 0
         }
     },
     methods:{
+        getFocus(_num){
+            this.focus = _num
+        },
+        setFocus(){
+            this.slide.doItemFocus(this.focus)
+        },
         setItems(_num){
             let arr = new Array
             for (let index = 0; index < _num; index++) {
@@ -107,12 +140,19 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../luminus/luminus'
+.section
+    height 60vh
+    overflow hidden
+    background-color grey
+    margin-top 1em
+    padding 1em
 
 #Caroucel
-    height 60vh
-    .caroucel-item
-        width 400px
-    .box
-        background-color white
+    .caroucel
+        margin-left -1em
+        margin-right -1em
+
+#Card
+    #lumi-card
+        width 320px
 </style>

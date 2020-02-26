@@ -1,5 +1,6 @@
 <template>
     <div class="lumi-flex-slider-wrapper" ref="main"
+        :class="{ 'lumi-flex-slider-aligin-bottom': (verticalAligen == 'bottom') }"
         v-touch:swipe="touchSwipeHandler"
         @touchstart="touchStartHandler"
         @mousedown="sliderFocusOn($event)"
@@ -30,6 +31,10 @@ export default {
         itemStiky: {
             type: Boolean,
             default: true
+        },
+        verticalAligen: {
+            type: String,
+            default: "bottom"
         },
         speedStiky: {
             default: 1000,
@@ -340,6 +345,8 @@ export default {
     watch: {
         slideFocused(_focusingNumber){
             this.doItemFocus(_focusingNumber)
+
+            this.$emit('focused',_focusingNumber)
         },
         childrenSlide(_newSlide){
             console.log("Slide Changed => ",_newSlide)
@@ -352,8 +359,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../luminus'
-
 .activate
     border 1px solid red
 </style>

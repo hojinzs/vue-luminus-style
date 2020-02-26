@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "webpack --mode production",
-    "export": "webpack-cli --config webpack.config.js",
+    "export": "webpack-cli --config webpack.config.js && stylus --compress ./luminus/luminus.styl --out ./dist/luminus.css",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -19,14 +19,15 @@
     "@vue/cli-plugin-eslint": "^4.2.0",
     "@vue/cli-plugin-router": "^4.2.2",
     "@vue/cli-service": "^4.2.0",
-    "core-js": "^3.6.4",
-    "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.3",
     "babel-preset-env": "^1.7.0",
+    "core-js": "^3.6.4",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.1.2",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2",
     "vue-loader": "^15.9.0",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.11",

@@ -32,3 +32,21 @@
             img
                 user-select none
                 -webkit-user-drag: none; 
+
+
+.lumi-thumbnail-wrapper
+    background-color $light_grey
+    &.thumbnail-border-radius
+        // border 0.5px solid $light_grey
+        border-radius 0.5rem
+    .lumi-thumbnail
+        overflow hidden
+        display flex
+        align-items center 
+        justify-content center
+        width 100px
+        height 100px
+        img
+            width auto
+            height 100%
+

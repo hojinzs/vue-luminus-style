@@ -2,7 +2,7 @@
 * Clear Styles
 * ref: https://gist.github.com/JuanitoFatas/5606544
 */
-html, body, div, span, applet, object, iframe,
+html, body, div, span, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
 del, dfn, em, img, ins, kbd, q, s, samp,
@@ -30,7 +30,10 @@ footer, header, hgroup, menu, nav, section
 body
 	line-height 1
 
-ol, ul
+ul
+	padding-left: 0
+
+ol, ul, li
 	list-style none
 
 blockquote, q
@@ -44,6 +47,29 @@ qbefore, qafter
 table
 	border-collapse collapse
 	border-spacing 0
+
+/**
+* defalut style clear
+*/
+
+input, button, select
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    vertical-align baseline;
+    border none
+    outline: none;
+    font-size: 100%;
+    -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;
+
+input, textarea, button, select
+    -webkit-border-radius:0; -moz-border-radius:0; -o-border-radius:0; border-radius:0;
+
+select::-ms-expand
+    display: none;
+
+button
+    -webkit-appearance: none;
+    background-color: white;
+
 
 /**
 * import

@@ -52,7 +52,7 @@ button
         // animation style
         padding-bottom: 3px
         border-bottom: 3px solid $light_grey
-        // background-color: rgba(0,0,0,0)
+        background-color: rgba(0,0,0,0)
         transition-property: border-bottom border-top padding-top background-color
         transition-duration: 0.5s
         &:hover
@@ -229,3 +229,44 @@ table.lumi-table
                 // transition
                 transition-property: background color
                 transition-duration: 0.5s
+
+.lumi-blur-box
+    backdrop-filter blur(2px)
+    // backdrop-filter brightness(60%)
+
+
+/**
+* Card Components
+*/
+.lumi-card
+    width 260px
+    display inline-block
+    border-radius ( ($global_font_text / 2) + ($global_font_text / 4) )
+    padding-top t = ($global_font_text/2)
+    padding-bottom t
+    line-height $global_inline_height
+    background rgba(255,255,255,0.45)
+    overflow hidden
+    // &.lumi-box-border
+    //     border: 1px solid $light_grey
+    .lumi-card-header
+        margin-top -(t)
+        line-height $global_inline_height
+        padding-top t
+        padding-bottom t
+        padding-left ps = ( $global_font_text / 2)
+        padding-right ps
+        min-height $global_inline_height
+    .lumi-card-thumbnail
+        width 100%
+        overflow hidden
+        display flex
+        align-items center 
+        justify-content center
+        &.lumi-card-thumbnail-headless
+            margin-top -(t)
+    .lumi-card-contents
+        min-height $global_inline_height
+        margin-top t
+        padding-left ps = ( $global_font_text / 2)
+        padding-right ps
