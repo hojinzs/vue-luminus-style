@@ -183,6 +183,7 @@ export default {
                 this.mouseEvent.movedX = 0
                 
                 if(this.itemStiky && this.touchEvent.isSwipe == false) {
+                    console.log("Return Sticky => ", this.getStickyItem(true))
                     this.doItemFocus(this.getStickyItem(true))
                 }
             }
@@ -241,9 +242,7 @@ export default {
                     this.SliderMoving = false
                 },
             })
-
-            // this.transformX = transformX
-
+            
             return this
 
         },
@@ -274,14 +273,14 @@ export default {
                         break;
                 }
 
-                if(get_near === null || get_near > near){
+                if(get_near == null || get_near > near){
                     get_near = near
                     get_index = index 
                     get_element = element 
                 }
             });
 
-            if(_returnIndex === true){
+            if(_returnIndex == true){
                 return get_index
             }
 
