@@ -151,6 +151,8 @@ export default {
     .caroucel
         margin-left -1em
         margin-right -1em
+    .activate
+        border 1px solid red
 
 #Card
     #lumi-card

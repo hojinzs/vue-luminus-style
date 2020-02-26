@@ -363,6 +363,5 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.activate
-    border 1px solid red
+
 </style>
