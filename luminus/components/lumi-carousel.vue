@@ -1,6 +1,5 @@
 <template>
     <div class="lumi-flex-slider-wrapper" ref="main"
-        :class="{ 'lumi-flex-slider-aligin-bottom': (verticalAligen == 'bottom') }"
         v-touch:swipe="touchSwipeHandler"
         @touchstart="touchStartHandler"
         @mousedown="sliderFocusOn($event)"
@@ -8,6 +7,7 @@
         @mouseup="sliderMoveFinishHandler($event)"
         @mouseleave="sliderMoveFinishHandler($event)">
         <ul class="lumi-flex-slider" ref="slide"
+            v-bind:class="{ 'lumi-flex-slider-aligin-bottom': (verticalAlign == 'bottom') }"
             v-bind:style="{ transform: 'translateX('+transformX+'px)' }">
             <slot name="loading" v-if="!asyncStatus.loadFinish">
                 Loading
@@ -32,7 +32,7 @@ export default {
             type: Boolean,
             default: true
         },
-        verticalAligen: {
+        verticalAlign: {
             type: String,
             default: "bottom"
         },
@@ -272,15 +272,14 @@ export default {
                         break;
                 }
 
-                if(get_near == null || get_near > near){
+                if(get_near === null || get_near > near){
                     get_near = near
                     get_index = index 
                     get_element = element 
                 }
             });
 
-
-            if(_returnIndex == true){
+            if(_returnIndex === true){
                 return get_index
             }
 
