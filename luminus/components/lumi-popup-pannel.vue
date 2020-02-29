@@ -1,6 +1,6 @@
 <template>
     <div class="lumi-popup-backdrop"
-        v-show="(displayModal)"
+        v-show="displayModal"
         v-bind:style="[ styleBackdropFilter ]"
         @click.self.stop="close()">
 
@@ -54,7 +54,7 @@ export default {
     },
     data() {
         return {
-            displayModal: this.display,
+            displayModal: false,
             position: {
                 translateY: 0,
                 PannelMoving: false
@@ -81,9 +81,6 @@ export default {
         }
     },
     methods:{
-        show(_show = true){
-            this.display = _show
-        },
         touchStart($touchEvent){
             event.preventDefault()
             this.touchEvent.isMoving = true
@@ -156,7 +153,7 @@ export default {
 
         },
         open(){
-            if(!this.touchEvent.isMoving && this.displayModal == false && this.display == true){
+            if(!this.touchEvent.isMoving && this.displayModal == false){
                 this.displayModal = true
 
                 let during = this.transitionDuring,
@@ -192,7 +189,7 @@ export default {
             }
         },
         close(){
-            if(!this.touchEvent.isMoving && this.displayModal == true && this.display == true){
+            if(!this.touchEvent.isMoving && this.displayModal == true){
                 let during = this.transitionDuring,
                     interval = during / 50,
                     conunt = during / interval
@@ -237,8 +234,9 @@ export default {
         }
     },
     mounted(){
-        this.$emit('mounted',this)
         if(this.display) this.open()
+
+        this.$emit('mounted',this)
 
         // document.body.addEventListener('scroll',(e) => {
         //     if(this.display){
