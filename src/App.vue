@@ -77,25 +77,53 @@
                 asdf<br>
             </lumiCard>
         </section>
+
+        <section id="Backdrop" class="section">
+            <h2>Popup UI Sample </h2>
+            <button class="lumi-button"
+                @click="showPopupPannel = !showPopupPannel">
+                show Popup Pannel
+            </button>
+        </section>
+
+        <lumiPopupPannel
+            :display.sync="showPopupPannel"
+            :maxWidth="640"
+            @mounted="mountPopupPannel">
+            <div v-for="(text,index) in texts" 
+                v-bind:key="index">
+
+                asdf
+            </div>
+        </lumiPopupPannel>
+
     </div>
 </template>
 
 <script>
-import { lumiCaroucel, lumiCaroucelSlide, lumiCard } from '../luminus/components'
+import { 
+    lumiCaroucel,
+    lumiCaroucelSlide,
+    lumiCard,
+    lumiPopupPannel } from '../luminus/components'
 
 export default {
     name: 'App',
     components: {
         lumiCard,
         lumiCaroucel,
-        lumiCaroucelSlide
+        lumiCaroucelSlide,
+        lumiPopupPannel
     },
     data(){
         return {
             slide: Object,
+            PopupPannel: Object,
+            showPopupPannel: false,
             items: [],
             test: 10,
-            focus: 0
+            focus: 0,
+            texts: 100
         }
     },
     methods:{
@@ -129,10 +157,18 @@ export default {
             item.clicked = !item.clicked
             console.log("item Clicked!!")           
         },
-        setCaroucel($slide){
-            console.log("Slide Mounted => ", $slide)
-            this.slide = $slide
-        }
+        setCaroucel($vue){
+            console.log("Slide Mounted => ", $vue)
+            this.slide = $vue
+        },
+        mountPopupPannel($vue){
+            console.log("PopupPannel Mounted! => ", $vue)
+            this.PopupPannel = $vue
+        },
+        showPopup(){
+            console.log(this.PopupPannel)
+            this.PopupPannel.show(true)
+        },
     },
     mounted(){
         // this.items = this.setItems(20)
