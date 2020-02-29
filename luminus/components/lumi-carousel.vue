@@ -2,10 +2,7 @@
     <div class="lumi-flex-slider-wrapper" ref="main"
         v-touch:swipe="touchSwipeHandler"
         @touchstart="touchStartHandler"
-        @mousedown="sliderFocusOn($event)"
-        @mousemove="sliderMoveHandler($event)"
-        @mouseup="sliderMoveFinishHandler($event)"
-        @mouseleave="sliderMoveFinishHandler($event)">
+        @mousedown="mouseDownHandler">
         <ul class="lumi-flex-slider" ref="slide"
             v-bind:class="{ 'lumi-flex-slider-aligin-bottom': (verticalAlign == 'bottom') }"
             v-bind:style="{ transform: 'translateX('+transformX+'px)' }">
@@ -100,12 +97,13 @@ export default {
             paddingLeft : 0,
             touchEvent : {
                 isSwipe : false,
-                swipeTolerance : 400
+                swipeTolerance : 400,
             },
             mouseEvent : {
                 isMoving : false,
                 movedX : 0,
                 startPosition : 0,
+                totalMovded : 0,
             },
             asyncStatus: {
                 loadFinish: !this.async
@@ -120,14 +118,46 @@ export default {
         }
     },
     methods:{
-        clickCapture(_message){
-            console.log(_message)
-        },
-        touchStartHandler(){
-            this.touchEvent.isSwipe = true,
-            setTimeout(() => {
-                this.touchEvent.isSwipe = false
-            },this.touchEvent.swipeTolerance)
+        // clickCaputerHandler(){
+        //     console.log("Parents Clicked!!")
+        // },
+        touchStartHandler($touchStartEvent){
+
+            if(this.SliderMoving == false){
+                this.mouseEvent.isMoving = true
+                this.mouseEvent.movedX = $touchStartEvent.touches[0].clientX
+                this.mouseEvent.totalMovded = 0
+
+                /**
+                 * 일정 시간 동안 스와이프 판정
+                 */
+                this.touchEvent.isSwipe = true,
+                setTimeout(() => {
+                    this.touchEvent.isSwipe = false
+                },this.touchEvent.swipeTolerance)
+
+                let touchMove = ($touchMoveEvent) => {
+                    let moved = this.mouseEvent.movedX - $touchMoveEvent.touches[0].clientX
+                    this.mouseEvent.totalMovded = this.mouseEvent.totalMovded + Math.abs(moved)
+
+                    this.transformX = this.transformX - moved
+
+                    // clear
+                    this.mouseEvent.movedX = $touchMoveEvent.touches[0].clientX
+                    this.mouseEvent.startPosition = 0
+                }
+
+                let touchEnd = () => {
+                    document.body.removeEventListener("touchmove", touchMove,false)
+                    this.mouseEvent.isMoving = false
+                    this.mouseEvent.movedX = 0
+
+                    if(this.itemStiky && this.touchEvent.isSwipe == false) this.doItemFocus(this.getStickyItem(true))
+                }
+
+                document.body.addEventListener('touchmove',touchMove,false)
+                document.body.addEventListener('touchend',touchEnd,{once: true})
+            }
         },
         touchSwipeHandler(_direction){
             console.log("Swipe => ",_direction)
@@ -147,45 +177,53 @@ export default {
                 }
             }
         },
-        sliderFocusOn($event){
+        mouseDownHandler($event){
             if(this.SliderMoving == false) {
                 this.mouseEvent.isMoving = true
-                // this.mouseEvent.startPosition = $event.clientX
                 this.mouseEvent.movedX = $event.clientX
+                this.mouseEvent.totalMovded = 0
 
+                /**
+                 * 일정 시간 동안 스와이프 판정
+                 */
                 this.touchEvent.isSwipe = true,
                 setTimeout(() => {
                     this.touchEvent.isSwipe = false
                 },this.touchEvent.swipeTolerance)
-            }
-        },
-        sliderMoveHandler($event){
-            if(this.mouseEvent.isMoving == true){
-                // let moved = this.mouseEvent.movedX - $event.clientX
-                let moved = this.mouseEvent.movedX - $event.clientX
-                
-                console.log("moved => ",moved)
 
-                // this.$el.scrollLeft = this.$el.scrollLeft + this.mouseEvent.startPosition + moved 
-                this.transformX = this.transformX - moved
+                /**
+                 * 마우스가 움직일때 핸들러
+                 */
+                let mouseMove = ($mouseMoveEvent) => {
+                    let moved = this.mouseEvent.movedX - $mouseMoveEvent.clientX
+                    this.mouseEvent.totalMovded = this.mouseEvent.totalMovded + Math.abs(moved)
 
+                   // /**
+                    // * scroll Based Moving Code (Achaive)
+                    // */
+                    // let moved = this.mouseEvent.movedX - $event.clientX
+                    // this.$el.scrollLeft = this.$el.scrollLeft + this.mouseEvent.startPosition + moved 
+                    // console.log("moved => ",moved, this.totalMovded)
 
-                // clear
-                this.mouseEvent.movedX = $event.clientX
-                this.mouseEvent.startPosition = 0
-            }
-        },
-        sliderMoveFinishHandler(){
-            if(this.mouseEvent.isMoving == true){
+                    this.transformX = this.transformX - moved
 
-                // console.log("Finish Handler Captured!")
-                this.mouseEvent.isMoving = false
-                this.mouseEvent.movedX = 0
-                
-                if(this.itemStiky && this.touchEvent.isSwipe == false) {
-                    console.log("Return Sticky => ", this.getStickyItem(true))
-                    this.doItemFocus(this.getStickyItem(true))
+                    // clear
+                    this.mouseEvent.movedX = $mouseMoveEvent.clientX
+                    this.mouseEvent.startPosition = 0
                 }
+
+                let mouseUp = () => {
+                    document.body.removeEventListener("mousemove", mouseMove,false)
+                    this.mouseEvent.isMoving = false
+                    this.mouseEvent.movedX = 0
+
+                    if(this.mouseEvent.totalMovded != 0) event.stopPropagation()
+                    if(this.itemStiky && this.touchEvent.isSwipe == false) this.doItemFocus(this.getStickyItem(true))
+                }
+
+                document.body.addEventListener('mousemove',mouseMove,false)
+                document.body.addEventListener('mouseup',mouseUp,{once: true})
+
             }
         },
         doItemStiky(_item){
@@ -205,7 +243,6 @@ export default {
                     if(!_item) _item = this.getStickyItem(false,'center')
                     // movin = (_item.offsetLeft + ( _item.offsetWidth / 2) ) - ( this.$el.scrollLeft + ( this.$el.offsetWidth / 2 ) )
                     movin = -( this.$el.clientWidth / 2 ) + _item.offsetLeft + ( _item.offsetWidth / 2)
-                    console.log(this.$el.clientWidth, _item.offsetLeft,( _item.offsetWidth / 2))
                     break
 
                 case 'right':
@@ -233,11 +270,11 @@ export default {
                 duration: this.stickyAnimation.speed,
                 easing: this.stickyAnimation.easing,
                 begin:() => {
-                    console.log("movin start")
+                    // console.log("movin start")
                     this.SliderMoving = true 
                 },
                 complete: () => {
-                    console.log("movin end")
+                    // console.log("movin end")
                     this.transformX = transformX
                     this.SliderMoving = false
                 },
@@ -300,7 +337,7 @@ export default {
             if(arr.length > 0) {
                 let focusItem = arr[_itemNumber]
                 focusItem.classList.add('activate')
-                console.log(">> doItemFocus",focusItem)
+                // console.log(">> doItemFocus",focusItem)
                 this.doItemStiky(focusItem)
             }
 
@@ -337,6 +374,12 @@ export default {
             this.doItemFocus(0)
             return this
         },
+        /**
+         * 하위객체 데이터 전파를 위한 메소드
+         */
+        isClick(){
+            return this.mouseEvent.totalMovded == 0
+        }
     },
     mounted(){
         // this.setChildren()
@@ -350,9 +393,7 @@ export default {
 
             this.$emit('focused',_focusingNumber)
         },
-        childrenSlide(_newSlide){
-            console.log("Slide Changed => ",_newSlide)
-            
+        childrenSlide(){            
             if(this.asyncStatus.loadFinish == false) this.asyncStatus.loadFinish = true
             this.doItemFocus(this.focusItem)
         }

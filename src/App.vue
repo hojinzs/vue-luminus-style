@@ -20,7 +20,8 @@
                     <lumiCaroucelSlide
                         v-for="(item, index) in items"
                         :key="index"
-                        :ref="'item_num_'+index">
+                        :ref="'item_num_'+index"
+                        @onClick="setFocus(index)">
 
                         <template v-slot:loading>
                             <div>
@@ -35,7 +36,7 @@
                             </template>
                                 Toggled ::
                                 <button
-                                    @click="childClick(item)">
+                                    @click.capture="childClick(item)">
                                     {{ item.clicked }}
                                 </button>
                         </lumiCard>
@@ -101,8 +102,9 @@ export default {
         getFocus(_num){
             this.focus = _num
         },
-        setFocus(){
-            this.slide.doItemFocus(this.focus)
+        setFocus(_num = this.focus){
+            console.log("App :: Clicked => ",_num)
+            this.slide.doItemFocus(_num)
         },
         setItems(_num){
             let arr = new Array
@@ -123,6 +125,7 @@ export default {
             },2000)
         },
         childClick(item){
+            event.stopPropagation()
             item.clicked = !item.clicked
             console.log("item Clicked!!")           
         },

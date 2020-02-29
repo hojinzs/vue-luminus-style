@@ -1,6 +1,7 @@
 <template>
     <li class="lumi-flex-slider-item lumi-caroucel-item">
-        <a class="wrapper" oncontextmenu="return false" ondragstart="return false" onselectstart="return false">
+        <a class="wrapper" oncontextmenu="return false" ondragstart="return false" onselectstart="return false"
+            @click.capture.prevent="onClick()">
             <slot>
             </slot>
         </a>
@@ -10,23 +11,15 @@
 <script>
 export default {
     name: 'lumi-carousel-slide',
-    data(){
-        return {
-            offsetLeft:{
-                type: Number,
-                default : 0
+    methods:{
+        onClick(){
+            if(this.$parent.isClick()){
+                console.log("lumi-carousel-slide :: onclick event!!")
+                this.$emit('onClick',this)
             }
         }
     },
-    methods:{
-        getOffsetLeft(){
-            return this.offsetLeft
-        }
-    },
     mounted(){
-        // console.log(this.$el)
-        this.offsetLeft = this.$el.offsetLeft
-
         this.$emit('mounted',this)
     }
 }
