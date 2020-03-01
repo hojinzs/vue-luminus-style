@@ -282,7 +282,7 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .lumi-popup-backdrop
     position fixed
     overflow hidden
@@ -321,5 +321,4 @@ export default {
                 width 100%
                 height 85%
                 overflow-y scroll
-
 </style>
