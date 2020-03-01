@@ -2,19 +2,28 @@
     <div class="lumi-popup-backdrop"
         v-show="displayModal"
         v-bind:style="[ styleBackdropFilter ]"
-        @click.self.stop="close()">
+        @click.self.prevent="close()">
 
-        <div class="lumi-popup" ref="popup"
-            v-bind:style="{
-                transform: 'translateY('+position.translateY+'px)',
-                maxWidth: this.maxWidth+'px'}">
-            <div @touchstart="touchStart">
-                =====================
-            </div>
-            <div class="popup_contents">
-                <div class="popup_contents_wrapper">
-                    <slot></slot>
+        <div class="lumi-popop-wrapper"
+        v-bind:style="{height: maxHeight+'%'}"
+        @click.self.prevent="close()">
+
+            <div class="lumi-popup" ref="popup"
+                :style="{
+                    transform: 'translateY('+position.translateY+'px)',
+                    maxWidth: this.maxWidth+'px'}">
+
+                <div class="lumi-popup-pannel-handler"
+                    @touchstart="touchStart">
+                    <div class="hanlder" ref="handler"></div>
                 </div>
+
+                <div class="popup_contents">
+                    <div class="popup_contents_wrapper">
+                        <slot></slot>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -46,6 +55,10 @@ export default {
         maxWidth: {
             type: Number,
             default: 990
+        },
+        maxHeight: {
+            type: Number,
+            default: 92
         },
         returnTo: {
             type: Object,
@@ -82,12 +95,22 @@ export default {
     },
     methods:{
         touchStart($touchEvent){
-            event.preventDefault()
+            $touchEvent.preventDefault()
             this.touchEvent.isMoving = true
             this.touchEvent.movedY = $touchEvent.touches[0].clientY
             this.touchEvent.totalMovded = 0
 
-            // 터치 스타트시 피드백 애니메이션 필요 (CSS 컨트롤)
+
+            /**
+             * 터치 시작시 피드백
+             */
+            Velocity(this.$refs.handler,{
+                scaleX: [1, 1.2, 0.8],
+                scaleY: [1, 1.5, 0.8]
+            },{
+                duration: 500,
+                easing: 'spring'
+            })
 
             /**
              * 일정 시간 동안 스와이프 판정
@@ -117,7 +140,8 @@ export default {
                  */
                 if(this.touchEvent.isSwipe){
                     if(this.touchEvent.totalMovded < 0){
-                        this.close()
+                        this.touchEvent.isMoving = false
+                        this.$emit('update:display',false)
                         return
                     }
                 }
@@ -264,27 +288,38 @@ export default {
     overflow hidden
     z-index 500
     top 0
-    // bottom
     height 100%
     width 100%
     text-align center
     // backdrop-filter blur(2px) brightness(30%)
-    .lumi-popup
-        // position absolute
-        // top 4em
-        overflow hidden
-        margin 0 auto
-        z-index 510
-        margin-top 4em
-        height 110%
+    .lumi-popop-wrapper
+        position absolute
+        bottom 0
         width 100%
-        background-color white
-        border-radius 1.3em 1.3em 0 0
-        box-shadow 0px -2px 12px 4px rgba(0,0,0,0.4)
-        .popup_header
-            min-height 1em
-        .popup_contents
+        height 95%
+        .lumi-popup
+            overflow hidden
+            margin 0 auto
+            z-index 510
+            bottom 0
+            height 110%
             width 100%
-            height 82%
-            overflow-y scroll
+            background-color white
+            border-radius 0.6em 0.6em 0 0
+            box-shadow 0px -2px 12px 4px rgba(0,0,0,0.4)
+            .lumi-popup-pannel-handler
+                .hanlder
+                    background-color grey
+                    height 8px
+                    width 30%
+                    max-width 300px
+                    margin 0 auto
+                    margin-bottom 7px
+                    margin-top 5px
+                    border-radius 4px
+            .popup_contents
+                width 100%
+                height 85%
+                overflow-y scroll
+
 </style>

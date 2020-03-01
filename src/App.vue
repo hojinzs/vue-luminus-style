@@ -90,11 +90,12 @@
             :display.sync="showPopupPannel"
             :maxWidth="640"
             @mounted="mountPopupPannel">
+            <span>START</span>
             <div v-for="(text,index) in texts" 
                 v-bind:key="index">
-
                 asdf
             </div>
+            <span>END</span>
         </lumiPopupPannel>
 
     </div>
