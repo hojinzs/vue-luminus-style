@@ -106,7 +106,8 @@ export default {
              */
             Velocity(this.$refs.handler,{
                 scaleX: [1, 1.2, 0.8],
-                scaleY: [1, 1.5, 0.8]
+                scaleY: [1, 1.5, 0.8],
+                backgroundColor: '#4d4d4d',
             },{
                 duration: 500,
                 easing: 'spring'
@@ -134,6 +135,15 @@ export default {
 
             let touchEnd = () => {
                 document.body.removeEventListener("touchmove", touchMove)
+
+                /**
+                 * 터치 시작시 피드백
+                 */
+                Velocity(this.$refs.handler,{
+                    backgroundColor: '#a6a6a6',
+                },{
+                    duration: 500,
+                })
 
                 /**
                  * 스와이프 감지 시간동안, 음의 방향으로 움직였다면 닫기로 감지
@@ -309,7 +319,7 @@ export default {
             box-shadow 0px -2px 12px 4px rgba(0,0,0,0.4)
             .lumi-popup-pannel-handler
                 .hanlder
-                    background-color grey
+                    background-color #a6a6a6
                     height 8px
                     width 30%
                     max-width 300px
