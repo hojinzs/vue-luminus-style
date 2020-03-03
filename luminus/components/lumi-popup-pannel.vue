@@ -32,6 +32,7 @@
 
 <script>
 import Velocity from 'velocity-animate'
+import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
 
 export default {
     name: 'lumi-popup',
@@ -218,6 +219,8 @@ export default {
                     this.backdrop.Blur = this.backdropBlur
                     this.backdrop.Bright = this.backdropBright
 
+                    disableBodyScroll(this.$refs['popup'])
+
                     this.$emit('update:display',true)
                 }, during);
             }
@@ -254,6 +257,7 @@ export default {
                     this.backdrop.Bright = 100
 
                     this.$emit('update:display',false)
+                    enableBodyScroll(this.$refs['popup'])
 
                     if(this.returnTo) this.$router.push(this.returnTo)
                 }, during);
@@ -289,6 +293,9 @@ export default {
         // },{passive: false})
 
     },
+    destroyed(){
+        clearAllBodyScrollLocks()
+    }
 }
 </script>
 
