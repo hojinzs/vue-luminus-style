@@ -2,10 +2,11 @@
     <div class="lumi-popup-backdrop"
     v-show="displayModal"
     v-bind:style="[ styleBackdropFilter ]"
-    @click="setClose()">
+    @click.self="setClose()">
 
         <div class="lumi-popop-wrapper"
-        v-bind:style="{height: maxHeight+'%'}">
+        v-bind:style="{height: maxHeight+'%'}"
+        @click.self="setClose()">
 
             <div class="lumi-popup" ref="popup"
                 :style="{
@@ -240,7 +241,7 @@ export default {
                     this.backdrop.Blur = this.backdropBlur
                     this.backdrop.Bright = this.backdropBright
 
-                    disableBodyScroll(this.$el)
+                    disableBodyScroll(this.$refs.contents)
                 }, during);
             }
             this.$refs['contents'].scrollTop = 0
@@ -276,7 +277,7 @@ export default {
                     this.backdrop.Blur = 0
                     this.backdrop.Bright = 100
 
-                    enableBodyScroll(this.$el)
+                    enableBodyScroll(this.$refs.contents)
                     this.displayModal = false
 
                     if(this.returnTo) this.$router.push(this.returnTo)
@@ -317,7 +318,7 @@ export default {
 <style lang="stylus" scoped>
 .lumi-popup-backdrop
     position fixed
-    // overflow hidden
+    overflow hidden
     z-index 500
     top 0
     right 0
@@ -362,6 +363,9 @@ export default {
                     margin 3px 0px 3px 0px
             .popup_contents
                 flex 1 1 auto
+                width 100%
+                overflow auto
                 overflow-y scroll
-                // -webkit-overflow-scrolling none
+                height 100%
+                -webkit-overflow-scrolling touch
 </style>
