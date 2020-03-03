@@ -1,12 +1,12 @@
 <template>
     <div class="lumi-popup-backdrop"
-        v-show="displayModal"
-        v-bind:style="[ styleBackdropFilter ]"
-        @click.self.prevent="close()">
+    v-show="displayModal"
+    v-bind:style="[ styleBackdropFilter ]"
+    @click.self="close()">
 
         <div class="lumi-popop-wrapper"
         v-bind:style="{height: maxHeight+'%'}"
-        @click.self.prevent="close()">
+        @click.self="close()">
 
             <div class="lumi-popup" ref="popup"
                 :style="{
@@ -18,13 +18,25 @@
                     <div class="hanlder" ref="handler"></div>
                 </div>
 
-                <div class="popup_contents">
+                <div class="lumi-popup-pannel-header"
+                    v-if="showHeader">
+                    <slot name="header">
+                        <div class="header-default">
+                            <h3>{{headerTitle}}</h3>
+                        </div>
+                    </slot>
+                </div>
+
+                <div class="popup_contents"
+                @scroll.passive="handleScroll"
+                :style="'box-shadow: inset 1px 6px 9px -6px rgba(0,0,0,'+contents.scrollShadow+')'">
                     <div class="popup_contents_wrapper">
                         <slot></slot>
                     </div>
                 </div>
 
             </div>
+
         </div>
 
     </div>
@@ -64,9 +76,19 @@ export default {
         returnTo: {
             type: Object,
             default: null
+        },
+        headerTitle: {
+            type: String,
+        },
+        useHeader: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
+        let _headerTitleUse = () => {
+            return !(typeof this.headerTitle == 'undefined') || this.useHeader
+        }
         return {
             displayModal: false,
             position: {
@@ -84,7 +106,11 @@ export default {
                 startPosition: 0,
                 swipeTolerance: 300,
                 totalMovded: 0,
-            }
+            },
+            contents: {
+                scrollShadow: 0
+            },
+            showHeader: _headerTitleUse()
         }
     },
     computed: {
@@ -92,7 +118,7 @@ export default {
             return {
                 backdropFilter: "blur("+this.backdrop.Blur+"px) brightness("+this.backdrop.Bright+"%)"
             }
-        }
+        },
     },
     methods:{
         touchStart($touchEvent){
@@ -100,7 +126,6 @@ export default {
             this.touchEvent.isMoving = true
             this.touchEvent.movedY = $touchEvent.touches[0].clientY
             this.touchEvent.totalMovded = 0
-
 
             /**
              * 터치 시작시 피드백
@@ -263,35 +288,24 @@ export default {
                 }, during);
             }
         },
+        handleScroll($event){
+            if($event.target.scrollTop >= 120) {
+                this.contents.scrollShadow = 0.60
+            } else {
+                this.contents.scrollShadow = $event.target.scrollTop*0.005
+            }
+            return
+        }
     },
     watch: {
         display(_newDisplay,_oldDisplay){
-            console.log(_newDisplay,_oldDisplay)
             if(_newDisplay == true && _oldDisplay == false) this.open()
             if(_newDisplay == false && _oldDisplay == true) this.close()
-        }
+        },
     },
     mounted(){
         if(this.display) this.open()
-
         this.$emit('mounted',this)
-
-        // document.body.addEventListener('scroll',(e) => {
-        //     if(this.display){
-        //         e.preventDefault()
-        //     }
-        // },{passive: false})
-        // document.body.addEventListener('touchmove',(e) => {
-        //     if(this.display){
-        //         e.preventDefault()
-        //     }
-        // },{passive: false})
-        // document.body.addEventListener('mousewheel',(e) => {
-        //     if(this.display){
-        //         e.preventDefault()
-        //     }
-        // },{passive: false})
-
     },
     destroyed(){
         clearAllBodyScrollLocks()
@@ -316,15 +330,19 @@ export default {
         height 95%
         .lumi-popup
             overflow hidden
+            display flex
+            flex-direction column
             margin 0 auto
             z-index 510
             bottom 0
-            height 110%
+            height 100%
             width 100%
+            padding-bottom 50%
             background-color white
             border-radius 0.6em 0.6em 0 0
             box-shadow 0px -2px 12px 4px rgba(0,0,0,0.4)
             .lumi-popup-pannel-handler
+                flex 1 1 auto
                 .hanlder
                     background-color #a6a6a6
                     height 8px
@@ -334,8 +352,12 @@ export default {
                     margin-bottom 7px
                     margin-top 5px
                     border-radius 4px
+            .lumi-popup-pannel-header
+                flex 1 1 auto
+                .header-default
+                    margin 3px 0px 3px 0px
             .popup_contents
-                width 100%
-                height 85%
+                flex 1 1 auto
                 overflow-y scroll
+
 </style>

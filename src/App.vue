@@ -85,11 +85,15 @@
                 show Popup Pannel
             </button>
         </section>
-
+<!-- :headerTitle="'Popup Pannel Sample'" -->
         <lumiPopupPannel
+            :useHeader="true"
             :display.sync="showPopupPannel"
             :maxWidth="640"
             @mounted="mountPopupPannel">
+            <template v-slot:header>
+                Header Sample
+            </template>
             <span>START</span>
             <div v-for="(text,index) in texts" 
                 v-bind:key="index">
