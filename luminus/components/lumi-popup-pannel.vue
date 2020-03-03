@@ -2,11 +2,10 @@
     <div class="lumi-popup-backdrop"
     v-show="displayModal"
     v-bind:style="[ styleBackdropFilter ]"
-    @click.self="close()">
+    @click="setClose()">
 
         <div class="lumi-popop-wrapper"
-        v-bind:style="{height: maxHeight+'%'}"
-        @click.self="close()">
+        v-bind:style="{height: maxHeight+'%'}">
 
             <div class="lumi-popup" ref="popup"
                 :style="{
@@ -19,7 +18,8 @@
                 </div>
 
                 <div class="lumi-popup-pannel-header"
-                    v-if="showHeader">
+                    v-if="showHeader"
+                    @click="$refs.contents.scrollTop = 0">
                     <slot name="header">
                         <div class="header-default">
                             <h3>{{headerTitle}}</h3>
@@ -27,10 +27,10 @@
                     </slot>
                 </div>
 
-                <div class="popup_contents"
-                @scroll.passive="handleScroll"
+                <div class="popup_contents" ref="contents"
+                @scroll="handleScroll"
                 :style="'box-shadow: inset 1px 6px 9px -6px rgba(0,0,0,'+contents.scrollShadow+')'">
-                    <div class="popup_contents_wrapper">
+                    <div class="popup_contents_wrapper" >
                         <slot></slot>
                     </div>
                 </div>
@@ -121,8 +121,11 @@ export default {
         },
     },
     methods:{
+        setClose(){
+            if(!this.touchEvent.isMoving) this.$emit('update:display',false)
+        },
         touchStart($touchEvent){
-            $touchEvent.preventDefault()
+            // $touchEvent.preventDefault()
             this.touchEvent.isMoving = true
             this.touchEvent.movedY = $touchEvent.touches[0].clientY
             this.touchEvent.totalMovded = 0
@@ -152,12 +155,10 @@ export default {
                 this.position.translateY = this.position.translateY - moved
                 this.touchEvent.totalMovded = this.touchEvent.totalMovded + moved
 
-                // console.log("moved => ", moved)
-
-                // clear
                 this.touchEvent.movedY = $touchMoveEvent.touches[0].clientY
                 this.touchEvent.startPosition = 0
             }
+            /** finish touchMove **/
 
             let touchEnd = () => {
                 document.body.removeEventListener("touchmove", touchMove)
@@ -174,43 +175,38 @@ export default {
                 /**
                  * 스와이프 감지 시간동안, 음의 방향으로 움직였다면 닫기로 감지
                  */
-                if(this.touchEvent.isSwipe){
-                    if(this.touchEvent.totalMovded < 0){
+                if(this.touchEvent.isSwipe && this.touchEvent.totalMovded < 0){
+                    this.touchEvent.isMoving = false
+                    this.setClose()
+                } else {
+                    /**
+                     * body Height의 70% 이하로 내려가면 창을 닫는다.
+                     */
+                    let scrollDowned = this.$el.clientTop + this.position.translateY,
+                        limit = ( window.outerHeight * ( 1 - 0.70) )
+                    if(scrollDowned > limit){
                         this.touchEvent.isMoving = false
-                        this.$emit('update:display',false)
-                        return
+                        this.setClose()
+                    } else {
+                        // 70% 이하가 아닐 경우 바운스
+                        Velocity(this.$refs['popup'], {
+                            translateY: [ 0, this.position.translateY ]
+                        },{
+                            duration: this.transitionDuring,
+                            easing: 'spring',
+                            complete: () => {
+                                this.position.translateY = 0
+                                this.touchEvent.isMoving = false
+                                this.touchEvent.movedY = 0
+                            },
+                        })
                     }
                 }
-
-                /**
-                 * body Height의 70% 이하로 내려가면 창을 닫는다.
-                 */
-                let scrollDowned = this.$el.clientTop + this.position.translateY,
-                    limit = ( window.outerHeight * ( 1 - 0.70) )
-                if(scrollDowned > limit){
-                    this.touchEvent.isMoving = false
-                    this.close()
-                    return
-                } else {
-                    // 70% 이하가 아닐 경우 바운스
-                    Velocity(this.$refs['popup'], {
-                        translateY: [ 0, this.position.translateY ]
-                    },{
-                        duration: this.transitionDuring,
-                        easing: 'spring',
-                        complete: () => {
-                            this.position.translateY = 0
-                            this.touchEvent.isMoving = false
-                            this.touchEvent.movedY = 0
-                        },
-                    })
-                    return
-                }
             }
+            /** finish touchEnd **/
 
             document.body.addEventListener('touchmove',touchMove,false)
             document.body.addEventListener('touchend',touchEnd,{once: true})
-
         },
         open(){
             if(!this.touchEvent.isMoving && this.displayModal == false){
@@ -244,11 +240,11 @@ export default {
                     this.backdrop.Blur = this.backdropBlur
                     this.backdrop.Bright = this.backdropBright
 
-                    disableBodyScroll(this.$refs['popup'])
-
-                    this.$emit('update:display',true)
+                    disableBodyScroll(this.$el)
                 }, during);
             }
+            this.$refs['contents'].scrollTop = 0
+            return false
         },
         close(){
             if(!this.touchEvent.isMoving && this.displayModal == true){
@@ -270,7 +266,6 @@ export default {
                         this.touchEvent.isMoving = true
                     },
                     complete: () => {
-                        this.displayModal = false
                         this.position.translateY = 0
                         this.touchEvent.isMoving = false
                     }
@@ -281,12 +276,13 @@ export default {
                     this.backdrop.Blur = 0
                     this.backdrop.Bright = 100
 
-                    this.$emit('update:display',false)
-                    enableBodyScroll(this.$refs['popup'])
+                    enableBodyScroll(this.$el)
+                    this.displayModal = false
 
                     if(this.returnTo) this.$router.push(this.returnTo)
                 }, during);
             }
+            return false
         },
         handleScroll($event){
             if($event.target.scrollTop >= 120) {
@@ -298,9 +294,14 @@ export default {
         }
     },
     watch: {
-        display(_newDisplay,_oldDisplay){
-            if(_newDisplay == true && _oldDisplay == false) this.open()
-            if(_newDisplay == false && _oldDisplay == true) this.close()
+        display(_newDisplay){
+            if(_newDisplay == true ){
+                console.log("popup Open")
+                this.open()
+            } else {
+                console.log("popup Close")
+                this.close()
+            }
         },
     },
     mounted(){
@@ -316,9 +317,12 @@ export default {
 <style lang="stylus" scoped>
 .lumi-popup-backdrop
     position fixed
-    overflow hidden
+    // overflow hidden
     z-index 500
     top 0
+    right 0
+    bottom 0
+    left 0
     height 100%
     width 100%
     text-align center
@@ -329,7 +333,7 @@ export default {
         width 100%
         height 95%
         .lumi-popup
-            overflow hidden
+            // overflow hidden
             display flex
             flex-direction column
             margin 0 auto
@@ -349,7 +353,7 @@ export default {
                     width 30%
                     max-width 300px
                     margin 0 auto
-                    margin-bottom 7px
+                    margin-bottom 10px
                     margin-top 5px
                     border-radius 4px
             .lumi-popup-pannel-header
@@ -359,5 +363,5 @@ export default {
             .popup_contents
                 flex 1 1 auto
                 overflow-y scroll
-
+                // -webkit-overflow-scrolling none
 </style>
