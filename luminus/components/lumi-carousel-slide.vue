@@ -14,7 +14,6 @@ export default {
     methods:{
         onClick(){
             if(this.$parent.isClick()){
-                console.log("lumi-carousel-slide :: onclick event!!")
                 this.$emit('onClick',this)
             }
         }

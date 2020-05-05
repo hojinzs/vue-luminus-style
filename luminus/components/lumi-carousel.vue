@@ -1,16 +1,32 @@
 <template>
-    <div class="lumi-flex-slider-wrapper" ref="main"
+    <div
+        class="lumi-flex-slider-wrapper" ref="main"
         v-touch:swipe="touchSwipeHandler"
         @touchstart="touchStartHandler"
-        @mousedown="mouseDownHandler">
-        <ul class="lumi-flex-slider" ref="slide"
-            v-bind:class="{ 'lumi-flex-slider-aligin-bottom': (verticalAlign == 'bottom') }"
-            v-bind:style="{ transform: 'translateX('+transformX+'px)' }">
-            <slot name="loading" v-if="!asyncStatus.loadFinish">
+        @mousedown="mouseDownHandler"
+    >
+        <ul
+            class="lumi-flex-slider" ref="slide"
+            v-bind:class="{ 'lumi-flex-slider-align-bottom': (verticalAlign === 'bottom') }"
+            v-bind:style="{ transform: 'translateX('+transformX+'px)' }"
+        >
+            <slot
+                name="loading"
+                v-if="!asyncStatus.loadFinish"
+            >
                 Loading
             </slot>
-            <slot v-if="asyncStatus.loadFinish"></slot>
-            <slot name="finish"></slot>
+
+            <slot
+                v-if="asyncStatus.loadFinish"
+            >
+            </slot>
+
+            <slot
+                name="finish"
+            >
+
+            </slot>
         </ul>
     </div>
 </template>
@@ -18,7 +34,7 @@
 import Vue from 'vue'
 import Velocity from 'velocity-animate'
 import Vue2TouchEvents from 'vue2-touch-events'
- 
+
 Vue.use(Vue2TouchEvents)
 
 export default {
@@ -38,7 +54,7 @@ export default {
                 if(typeof(_val) == 'number') return true
                 if(typeof(_val) == 'string'){
                     let modeList = ['slow','nomal','fast']
-                    return modeList.filter(mode => mode == _val ).length > 0
+                    return modeList.filter(mode => mode === _val ).length > 0
                 }
                 return false
             }
@@ -48,8 +64,12 @@ export default {
             default: 'left',
             validator: function(_val){
                 let modeList = ['left','center','right']
-                return modeList.filter(mode => mode == _val ).length > 0
+                return modeList.filter(mode => mode === _val ).length > 0
             }
+        },
+        autoFocusItem: {
+            type: Boolean,
+            default: true,
         },
         async:{
             type: Boolean,
@@ -58,7 +78,7 @@ export default {
     },
     data(){
         let setStickySpeed = function(_val){
-            let min = 100,              //최소 0.1초  
+            let min = 100,              //최소 0.1초
                 max = 800,              //최대 0.8초
                 default_speed = 300,    // 기본 스피드 0.3
                 speed = default_speed
@@ -78,11 +98,11 @@ export default {
                     case 'nomal':
                         speed = default_speed
                         break
-                    
+
                     case 'fast':
                         speed = min
                         break
-                
+
                     default:
                         speed = default_speed
                         break;
@@ -118,12 +138,9 @@ export default {
         }
     },
     methods:{
-        // clickCaputerHandler(){
-        //     console.log("Parents Clicked!!")
-        // },
         touchStartHandler($touchStartEvent){
 
-            if(this.SliderMoving == false){
+            if(this.SliderMoving === false){
                 this.mouseEvent.isMoving = true
                 this.mouseEvent.movedX = $touchStartEvent.touches[0].clientX
                 this.mouseEvent.totalMovded = 0
@@ -152,7 +169,7 @@ export default {
                     this.mouseEvent.isMoving = false
                     this.mouseEvent.movedX = 0
 
-                    if(this.itemStiky && this.touchEvent.isSwipe == false) this.doItemFocus(this.getStickyItem(true))
+                    if(this.itemStiky && this.touchEvent.isSwipe === false) this.doItemFocus(this.getStickyItem(true))
                 }
 
                 document.body.addEventListener('touchmove',touchMove,false)
@@ -161,7 +178,7 @@ export default {
         },
         touchSwipeHandler(_direction){
             console.log("Swipe => ",_direction)
-            if(this.SliderMoving == false && this.touchEvent.isSwipe == true) {
+            if(this.SliderMoving === false && this.touchEvent.isSwipe === true) {
 
                 switch (_direction) {
                     case 'left':
@@ -178,7 +195,7 @@ export default {
             }
         },
         mouseDownHandler($event){
-            if(this.SliderMoving == false) {
+            if(this.SliderMoving === false) {
                 this.mouseEvent.isMoving = true
                 this.mouseEvent.movedX = $event.clientX
                 this.mouseEvent.totalMovded = 0
@@ -198,13 +215,6 @@ export default {
                     let moved = this.mouseEvent.movedX - $mouseMoveEvent.clientX
                     this.mouseEvent.totalMovded = this.mouseEvent.totalMovded + Math.abs(moved)
 
-                   // /**
-                    // * scroll Based Moving Code (Achaive)
-                    // */
-                    // let moved = this.mouseEvent.movedX - $event.clientX
-                    // this.$el.scrollLeft = this.$el.scrollLeft + this.mouseEvent.startPosition + moved 
-                    // console.log("moved => ",moved, this.totalMovded)
-
                     this.transformX = this.transformX - moved
 
                     // clear
@@ -217,8 +227,8 @@ export default {
                     this.mouseEvent.isMoving = false
                     this.mouseEvent.movedX = 0
 
-                    if(this.mouseEvent.totalMovded != 0) event.stopPropagation()
-                    if(this.itemStiky && this.touchEvent.isSwipe == false) this.doItemFocus(this.getStickyItem(true))
+                    if(this.mouseEvent.totalMovded !== 0) event.stopPropagation()
+                    if(this.itemStiky && this.touchEvent.isSwipe === false) this.doItemFocus(this.getStickyItem(true))
                 }
 
                 document.body.addEventListener('mousemove',mouseMove,false)
@@ -226,34 +236,35 @@ export default {
 
             }
         },
-        doItemStiky(_item){
+        /**
+         * 아이템을 화면의 지정된 포지션(left,center,right)으로 정렬한다.
+         * @param _item {Element} 정렬할 아이템 엘리먼트
+         * @returns {default.methods}
+         */
+        doItemStiky(_item = null){
 
+            // 슬라이더가 움직이는 중이라면 캔슬
             if(this.SliderMoving) return this
 
-            let movin
-
+            let movin // 움직일 거리를 계산한다.
             switch (this.positionStiky) {
                 case 'left':
                     if(!_item) _item = this.getStickyItem(false,'left')
-                    // movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
                     movin = _item.offsetLeft
                     break;
 
                 case 'center':
                     if(!_item) _item = this.getStickyItem(false,'center')
-                    // movin = (_item.offsetLeft + ( _item.offsetWidth / 2) ) - ( this.$el.scrollLeft + ( this.$el.offsetWidth / 2 ) )
                     movin = -( this.$el.clientWidth / 2 ) + _item.offsetLeft + ( _item.offsetWidth / 2)
                     break
 
                 case 'right':
                     if(!_item) _item = this.getStickyItem(false,'right')
-                    // movin = (_item.offsetLeft + _item.offsetWidth) - ( this.$el.scrollLeft + this.$el.offsetWidth ) // 대상 엘리먼트에서 보이지 않는 부분을 계산함 (-20)
                     movin = (_item.offsetLeft + _item.offsetWidth)
                     break;
-                    
+
                 default: //기본값 : left와 동일
                     if(!_item) _item = this.getStickyItem(false,'left')
-                    // movin = _item.offsetLeft - this.$el.scrollLeft - this.paddingLeft
                     movin = _item.offsetLeft
                     break;
             }
@@ -263,27 +274,28 @@ export default {
              * https://github.com/julianshapiro/velocity/wiki/Basic---Arguments
              */
             let transformX = -movin
-            // console.log(transformX) 
             Velocity(this.$refs.slide, {
                 translateX: [transformX, this.transformX]
             },{
                 duration: this.stickyAnimation.speed,
                 easing: this.stickyAnimation.easing,
                 begin:() => {
-                    // console.log("movin start")
-                    this.SliderMoving = true 
+                    this.SliderMoving = true
                 },
                 complete: () => {
-                    // console.log("movin end")
                     this.transformX = transformX
                     this.SliderMoving = false
                 },
             })
-            
             return this
-
         },
-        getStickyItem(_returnIndex = true,_position = this.positionStiky){
+        /**
+         * 화면의 지정된 포지션에 가까운 아이템을 가져옴
+         * @param _returnIndex {Boolean} 반환 타입 (indexNumber || Element)
+         * @param _position {string} 아이템을 가져올 화면 포지션 ['left', 'center', 'right']
+         * @return Number|Element
+         */
+        getStickyItem(_returnIndex = true, _position = this.positionStiky){
             let arr = this.$el.getElementsByClassName('lumi-caroucel-item'),
                 get_element,
                 get_index,
@@ -295,54 +307,54 @@ export default {
 
                 switch (_position) {
                     case 'left':
-                        // near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
                         near = Math.abs(this.transformX + element.offsetLeft)
                         break;
 
                     case 'center':
-                        // near = Math.abs( (this.$el.scrollLeft + ( this.$el.clientWidth / 2) ) - ( element.offsetLeft + ( element.offsetWidth / 2) ) )
                         near = Math.abs( ( this.transformX - ( this.$el.clientWidth / 2 ) ) + ( element.offsetLeft + ( element.offsetWidth / 2) ) )
                         break;
 
                     case 'right':
-                        // near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
                         near = Math.abs(this.$el.scrollLeft - element.offsetLeft)
                         break;
                 }
 
                 if(get_near == null || get_near > near){
                     get_near = near
-                    get_index = index 
-                    get_element = element 
+                    get_index = index
+                    get_element = element
                 }
             });
 
-            if(_returnIndex == true){
+            if(_returnIndex === true){
                 return get_index
             }
 
             return get_element
         },
-        doItemFocus(_itemNumber = 0){
-            if(this.slideFocused !== _itemNumber) {
-                this.slideFocused = _itemNumber
-                return
+        doItemFocus(itemNumber = 0){
+            if(this.slideFocused !== itemNumber) {
+                this.slideFocused = itemNumber
+                return this
             }
 
             let arr = this.$el.getElementsByClassName('lumi-caroucel-item'),
                 current = this.$el.getElementsByClassName('lumi-caroucel-item activate')[0]
 
-            if(current) current.classList.remove('activate') 
+            if(current) current.classList.remove('activate')
 
             if(arr.length > 0) {
-                let focusItem = arr[_itemNumber]
+                let focusItem = arr[itemNumber]
                 focusItem.classList.add('activate')
-                // console.log(">> doItemFocus",focusItem)
                 this.doItemStiky(focusItem)
             }
 
             return this
         },
+        /**
+         * 포커스 될 방향에 따라 포커스할 아이템 번호(sliderFocused)를 제어
+         * @param _direction {String} ('left','center','right') 이동할 방향
+         */
         setMoveFocus(_direction = null){
 
             switch (_direction) {
@@ -369,33 +381,48 @@ export default {
 
             return this
         },
-        setAsyncFinish(){
+        /**
+         * 상위 객체에서, async가 끝났을 때 포커스를 위해 제어
+         * @param focusItem {Number} async 종료 후 포커스할 아이템 넘버. -1이 주어진다면, 포커스하지 않는다.
+         */
+        setAsyncFinish(focusItem = 0){
             this.asyncStatus.loadFinish = true
-            this.doItemFocus(0)
+            if(focusItem > -1){
+                this.doItemFocus(focusItem)
+            }
             return this
         },
         /**
-         * 하위객체 데이터 전파를 위한 메소드
+         * 하위 객체 데이터 전파를 위한 메소드 (클릭인지 슬라이드인지 감지를 위해)
          */
         isClick(){
-            return this.mouseEvent.totalMovded == 0
+            return this.mouseEvent.totalMovded === 0
         }
     },
     mounted(){
-        // this.setChildren()
         this.doItemFocus(this.slideFocused)
-
         this.$emit('loaded',this)
     },
     watch: {
+        /**
+         * 내부 slideFocused 데이터 변화를 감지해 자동 포커스
+         */
         slideFocused(_focusingNumber){
             this.doItemFocus(_focusingNumber)
-
             this.$emit('focused',_focusingNumber)
         },
-        childrenSlide(){            
-            if(this.asyncStatus.loadFinish == false) this.asyncStatus.loadFinish = true
-            this.doItemFocus(this.focusItem)
+        /**
+         * 하위 슬라이드 아이템 수랑을 감지해, async 종료를 감지하고, 자동으로 아이템을 포커스한다.
+         */
+        childrenSlide(){
+            // async 종료로 변경
+            if(this.async === true && this.asyncStatus.loadFinish === false) {
+                this.asyncStatus.loadFinish = true
+            }
+            // 아이템 자동 포커스
+            if(this.autoFocusItem){
+                this.doItemFocus(this.slideFocused)
+            }
         }
     }
 }
