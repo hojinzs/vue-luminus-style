@@ -327,6 +327,7 @@ export default {
     height 100%
     width 100%
     text-align center
+    box-sizing content-box
     // backdrop-filter blur(2px) brightness(30%)
     .lumi-popop-wrapper
         position absolute
