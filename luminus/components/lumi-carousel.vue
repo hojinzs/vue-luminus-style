@@ -1,7 +1,8 @@
 <template>
     <div
-        class="lumi-flex-slider-wrapper" ref="main"
-        v-touch:swipe="touchSwipeHandler"
+        ref="main"
+        class="lumi-flex-slider-wrapper"
+        @swipe="touchSwipeHandler"
         @touchstart="touchStartHandler"
         @mousedown="mouseDownHandler"
     >
@@ -31,14 +32,15 @@
     </div>
 </template>
 <script>
-import Vue from 'vue'
 import Velocity from 'velocity-animate'
-import Vue2TouchEvents from 'vue2-touch-events'
-
-Vue.use(Vue2TouchEvents)
+import elementTouchControl from "../plugins/element-touch-control";
+import screenResizeDetector from "../mixins/screen-resize-detector";
 
 export default {
     name: 'lumi-carousel',
+    mixins: [
+        screenResizeDetector
+    ],
     props: {
         itemStiky: {
             type: Boolean,
@@ -134,7 +136,7 @@ export default {
                 easing : "spring"
             },
             slideFocused : 0,
-            childrenSlide : this.$children
+            childrenSlide : this.$children,
         }
     },
     methods:{
@@ -176,7 +178,8 @@ export default {
                 document.body.addEventListener('touchend',touchEnd,{once: true})
             }
         },
-        touchSwipeHandler(_direction){
+        touchSwipeHandler(e){
+            let _direction = e.detail.swipe
             console.log("Swipe => ",_direction)
             if(this.SliderMoving === false && this.touchEvent.isSwipe === true) {
 
@@ -357,6 +360,11 @@ export default {
          */
         setMoveFocus(_direction = null){
 
+            if(this.childrenSlide.length === 1){
+                this.doItemFocus(0)
+                return this;
+            }
+
             switch (_direction) {
                 case 'left':
                 case 'center':
@@ -397,9 +405,22 @@ export default {
          */
         isClick(){
             return this.mouseEvent.totalMovded === 0
+        },
+        testing(text = 'test'){
+            console.log("TESTING => ", text)
+        },
+        resizeAction() {
+            return setTimeout(() => {
+                this.doItemFocus(this.slideFocused)
+            },700)
         }
     },
     mounted(){
+        new elementTouchControl(this.$el, {
+            detectAxis: 'X',
+            swipeToleranceInterval: this.touchEvent.swipeTolerance,
+        })
+
         this.doItemFocus(this.slideFocused)
         this.$emit('loaded',this)
     },
@@ -423,7 +444,11 @@ export default {
             if(this.autoFocusItem){
                 this.doItemFocus(this.slideFocused)
             }
-        }
+        },
+        windowWidth(){
+            clearTimeout(this.resizeAction())
+            this.resizeAction()
+        },
     }
 }
 </script>

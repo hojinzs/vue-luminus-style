@@ -7,11 +7,7 @@ import lumiCard from './components/lumi-card.vue'
 
 import lumiPopupPannel from './components/lumi-popup-pannel.vue'
 
-import Vue2TouchEvents from 'vue2-touch-events'
-
 const install = Vue => {
-    Vue.use(Vue2TouchEvents)
-
     Vue.component('lumiPopupPannel',lumiPopupPannel)
     Vue.component('lumiCard', lumiCard);
     Vue.component('lumiCaroucel', lumiCaroucel);
